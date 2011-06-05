@@ -10,7 +10,44 @@ package com.github.slashmili.Zendroid;
 public final class R {
     public static final class attr {
     }
+    public static final class drawable {
+        public static final int severity=0x7f020000;
+        public static final int severity3=0x7f020001;
+        public static final int severity3_background=0x7f020002;
+        public static final int severity3_background_noevent=0x7f020003;
+        public static final int severity4=0x7f020004;
+        public static final int severity4_background=0x7f020005;
+        public static final int severity4_background_noevent=0x7f020006;
+        public static final int severity5=0x7f020007;
+        public static final int severity5_background=0x7f020008;
+        public static final int severity5_background_noevent=0x7f020009;
+    }
+    public static final class id {
+        public static final int WidgetBox=0x7f060006;
+        public static final int cancel=0x7f060004;
+        public static final int every=0x7f060003;
+        public static final int ok=0x7f060005;
+        public static final int password=0x7f060002;
+        public static final int severity3=0x7f06000f;
+        public static final int severity3Box=0x7f06000d;
+        public static final int severity3Img=0x7f06000e;
+        public static final int severity4=0x7f06000c;
+        public static final int severity4Box=0x7f06000a;
+        public static final int severity4Img=0x7f06000b;
+        public static final int severity5=0x7f060009;
+        public static final int severity5Box=0x7f060007;
+        public static final int severity5Img=0x7f060008;
+        public static final int url=0x7f060000;
+        public static final int username=0x7f060001;
+    }
+    public static final class layout {
+        public static final int main=0x7f030000;
+        public static final int small_widget=0x7f030001;
+    }
     public static final class string {
-        public static final int app_name=0x7f020000;
+        public static final int app_name=0x7f050000;
+    }
+    public static final class xml {
+        public static final int small_widget=0x7f040000;
     }
 }

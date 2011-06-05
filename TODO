@@ -1,0 +1,11 @@
+1. remove com.devstream.HttpClient
+2. fix json loading problem
+3. open config when widget is added
+4. fix db problem
+5. check given data before saving(and give advice about error and update widget)
+6. fix widget size
+7. add icon
+8. publish in market
+8. notify when error happen
+9. add large widget
+10. show errors and details in a list

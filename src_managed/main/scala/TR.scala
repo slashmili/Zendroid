@@ -4,7 +4,22 @@ import android.view.View
 
 case class TypedResource[T](id: Int)
 object TR {
-
+  val password = TypedResource[android.widget.EditText](R.id.password)
+  val severity3Box = TypedResource[android.widget.LinearLayout](R.id.severity3Box)
+  val severity3Img = TypedResource[android.widget.ImageView](R.id.severity3Img)
+  val severity3 = TypedResource[android.widget.TextView](R.id.severity3)
+  val ok = TypedResource[android.widget.Button](R.id.ok)
+  val severity4Img = TypedResource[android.widget.ImageView](R.id.severity4Img)
+  val severity5 = TypedResource[android.widget.TextView](R.id.severity5)
+  val WidgetBox = TypedResource[android.widget.LinearLayout](R.id.WidgetBox)
+  val severity5Box = TypedResource[android.widget.LinearLayout](R.id.severity5Box)
+  val every = TypedResource[android.widget.Spinner](R.id.every)
+  val severity5Img = TypedResource[android.widget.ImageView](R.id.severity5Img)
+  val username = TypedResource[android.widget.EditText](R.id.username)
+  val severity4Box = TypedResource[android.widget.LinearLayout](R.id.severity4Box)
+  val severity4 = TypedResource[android.widget.TextView](R.id.severity4)
+  val url = TypedResource[android.widget.EditText](R.id.url)
+  val cancel = TypedResource[android.widget.Button](R.id.cancel)
 }
 trait TypedViewHolder {
   def view: View
