@@ -5,17 +5,27 @@ import _root_.android.appwidget.AppWidgetProvider;
 import _root_.android.appwidget.AppWidgetManager;
 import _root_.android.widget.RemoteViews;
 import _root_.android.util.Log
+import _root_.org.json.JSONObject
 
-import utils.ZenossAPI
+import android.app.Service;
+import android.content.Intent;
+import android.content.ComponentName;
+import android.appwidget.AppWidgetManager;
+import android.os.IBinder;
+
+
+import utils._
+import ZenossEvents._
+
 import Storage.UserData
 
 class SmallWidget extends AppWidgetProvider {
   
   override def onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: Array[Int]) = {
-   appWidgetManager.updateAppWidget(appWidgetIds, updateWidget(context));
+    appWidgetManager.updateAppWidget(appWidgetIds, updateWidget(context));
   }
 
-
+   
   def updateWidget(context: Context): RemoteViews = {
    
     val events = getLastEvent(context)
@@ -55,30 +65,52 @@ class SmallWidget extends AppWidgetProvider {
   }
 
 
-  def getLastEvent(context: Context) : Option[Map[String, String]] = { 
-  try {
-    val dh = new UserData(context)
-    val saved_date = dh.selectAll 
-    if(saved_date != List()){
-        val zen = new ZenossAPI(saved_date(0)("url"))
-        zen.auth(saved_date(0)("username"), saved_date(0)("password"))
-        if(zen.authCheck == false)
-            return None
-      val events = zen.getEvents
-      if(events == None )
-        return None
+  def getLastEvent(context: Context) : Option[Map[String, String]] = 
+  { 
+    try 
+    {
+      val dh = new UserData(context)
+      //val saved_date = dh.selectAll 
+      //if(saved_date != List()){
+      if( 1 == 1){
+          Log.w("Widgets", "Login to Zenoss")
+          //val zen = new ZenossAPI(saved_date(0)("url"), saved_date(0)("username"), saved_date(0)("password"))
+          val zen = new ZenossAPI("https://monitoring.com", "milad", "")
+          Log.w("Widgets", "**************************************Logininig to Zenoss")
+          if(zen.auth == false) 
+              return None
+        Log.w("Widgets", "============*******************before request to Zenoss")
+        val jOpt = zen.eventsQuery
+        Log.w("Widgets", "============*******************after request to Zenoss")
+        if (jOpt == None)
+          return None
+        val jEvent = jOpt.get
+        var severity5 = 0
+        var severity4 = 0
+        var severity3 = 0
+        
+        if(jEvent.has("result") && jEvent.getJSONObject("result").has("events")){
+          val events = jEvent.getJSONObject("result").getJSONArray("events")
+          for(i <- 0 to  events.length -1 ){
+            val JO = new JSONObject( events.get(i).toString) 
+            if(JO.has("severity")){
+              JO.getString("severity") match {
+                case "5" => severity5 += 1
+                case "4" => severity4 += 1
+                case "3" => severity3 += 1
+              }
+            }
+          }
+            return Some(Map("severity5" -> severity5.toString, "severity4" -> severity4.toString, "severity3" -> severity3.toString))
+          }
+        
+      }
+    } catch { 
+        case e => e.printStackTrace()
+    }
 
-      return events 
+          return None
     }
-    else {
-        return None
-    }
-  } catch { 
-    case e => e.printStackTrace()
-  }
-  return None
-  }
 }
-
 
 

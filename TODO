@@ -1,5 +1,4 @@
-1. remove com.devstream.HttpClient
-2. fix json loading problem
+2. fix ANR timeout with service
 3. open config when widget is added
 4. fix db problem
 5. check given data before saving(and give advice about error and update widget)
