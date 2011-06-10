@@ -18,14 +18,20 @@ import utils._
 import ZenossEvents._
 
 import Storage.UserData
+import Services._
 
 class SmallWidget extends AppWidgetProvider {
-  
   override def onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: Array[Int]) = {
-    appWidgetManager.updateAppWidget(appWidgetIds, updateWidget(context));
+    appWidgetIds.foreach ( UpdateServiceStore.appendWidgetId(_) )
+    context.startService(new Intent(context, classOf[UpdateService]))
+    Log.d("**************", appWidgetIds.toString)
+
+  //  appWidgetManager.updateAppWidget(appWidgetIds, updateWidget(context));
   }
 
-   
+  override def onDeleted(context: Context, appWidgetIds: Array[Int]) = {
+    appWidgetIds.foreach (  UpdateServiceStore.removeWidgetId(_) )
+  }
   def updateWidget(context: Context): RemoteViews = {
    
     val events = getLastEvent(context)
@@ -67,6 +73,8 @@ class SmallWidget extends AppWidgetProvider {
 
   def getLastEvent(context: Context) : Option[Map[String, String]] = 
   { 
+
+    return Some(Map("severity5" -> "5", "severity4" -> "5", "severity3" -> "5"))
     try 
     {
       val dh = new UserData(context)

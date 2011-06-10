@@ -134,6 +134,7 @@ object HttpClient {
       httpPostRequest.setHeader("Accept-Encoding", "gzip")
 
       Log.w("HttpClient", "Executing Request")
+      //TODO: set timeout
       val response = httpclient.execute(httpPostRequest).asInstanceOf[HttpResponse]
       Log.w("HttpClient", "I've got some hot data from remote server")
 
