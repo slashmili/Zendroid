@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Zendroid</string>
+    <string-array name="update_every">
+        <item>Every 5 minutes</item>
+        <item>Every 10 minutes</item>
+        <item>Every 20 minutes</item>
+        <item>Every 30 minutes</item>
+        <item>Every 1 hour</item>
+    </string-array>
 </resources>

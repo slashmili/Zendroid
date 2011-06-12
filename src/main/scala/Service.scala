@@ -12,12 +12,13 @@ import android.content.Context
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.text.format.Time;
-
 import scala.actors.Actor
 import android.appwidget.AppWidgetManager;
+import android.net.Uri
+import org.apache.http.conn.HttpHostConnectException
 
-
-
+import javax.net.ssl.SSLException
+import java.net.UnknownHostException
 
 
 import _root_.android.widget.RemoteViews;
@@ -26,8 +27,8 @@ import _root_.org.json.JSONObject
 
 import android.content.ComponentName;
 import com.github.slashmili.Zendroid.utils._
+import com.github.slashmili.Zendroid.{ZenPreferences, AppWidgetConfigure}
 import ZenossEvents._
-
 
 
 import com.github.slashmili.Zendroid.R
@@ -57,14 +58,12 @@ class UpdateService extends Service   with  Actor {
     private val TAG = "Services.UpdateService" 
     val ACTION_UPDATE_ALL = "com.github.slashmili.Zendroid.UPDATE_ALL"
     def act() {
-      Log.d(TAG, "in actoooooooooooooooooooooooooooooooooor" )
         var appWidgetManager = AppWidgetManager.getInstance(this);
         loop {
           receive {
             case i: Int =>  {
-              Log.d(TAG, "I know this event")
               val info = appWidgetManager.getAppWidgetInfo(i)
-              val updateViews = updateWidget(this)             
+              val updateViews = updateWidget(this,i)
               appWidgetManager.updateAppWidget(i, updateViews);
 
             }
@@ -84,52 +83,72 @@ class UpdateService extends Service   with  Actor {
               UpdateServiceStore.getWidgetsIds.foreach {
                 this ! _
               }
-              Log.d(TAG, "onStart>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"  + UpdateServiceStore.getWidgetsIds.toString )
          // }
           super.onStart(intent, startId)
           this ! "stop"
-
-          val alarmManager = getSystemService(Context.ALARM_SERVICE).asInstanceOf[AlarmManager]
-
-          var time = new Time();
-          time.set(System.currentTimeMillis() + 180000)
-          val nextUpdate = time.toMillis(false)
-
-          val updateIntent = new Intent(ACTION_UPDATE_ALL)
-          updateIntent.setClass(this, classOf[UpdateService])
-
-          val pendingIntent = PendingIntent.getService(this, 0, updateIntent, 0);
-          alarmManager.set(AlarmManager.RTC, nextUpdate, pendingIntent) 
 
 
         }
     }
 
     override def onCreate = {
-      Log.d(TAG, "onCreate>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" )
       super.onCreate()
        stopSelf();
     }
 
     override def onDestroy = {
-      Log.d(TAG, "Destroy<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
       super.onDestroy
     }
 
     override def onBind(intent: Intent) : IBinder = {
-      Log.d(TAG, "onBind========================================");
       return null;
     }
 
 
-  def updateWidget(context: Context): RemoteViews = {
-   
-    val events = getLastEvent(context)
-
+  def updateWidget(context: Context, wId:Int): RemoteViews = {
+    val zp = ZenPreferences.loadPref(context, wId)
+    if ( zp == None){
+      val errorRemoteView = new RemoteViews(context.getPackageName(),R.layout.small_widget_error)
+      errorRemoteView.setTextViewText(R.id.widgetError,"Waiting for initial loading")
+      UpdateServiceStore.removeWidgetId(wId)
+      return errorRemoteView
+    }
+    var events: Option[Map[String, String]] = None
+    try {
+      events = getLastEvent(context, wId)
+    }catch {
+      case e :javax.net.ssl.SSLException => {
+        val errorRemoteView = new RemoteViews(context.getPackageName(),R.layout.small_widget_error)
+        errorRemoteView.setTextViewText(R.id.widgetError,"Your domain doesn't have valid ssl")
+        UpdateServiceStore.removeWidgetId(wId)
+        return errorRemoteView
+      }
+      case e:java.net.UnknownHostException => {
+        val errorRemoteView = new RemoteViews(context.getPackageName(),R.layout.small_widget_error)
+        errorRemoteView.setTextViewText(R.id.widgetError,"Cann't find host " + zp.get.filter(_._1 =="url")(0)._2 + ", delete it and create new one!")
+        UpdateServiceStore.removeWidgetId(wId)
+        return errorRemoteView
+      }
+      case e:org.apache.http.conn.HttpHostConnectException => {
+        val errorRemoteView = new RemoteViews(context.getPackageName(),R.layout.small_widget_error)
+        errorRemoteView.setTextViewText(R.id.widgetError,"Conenction to " + zp.get.filter(_._1 =="url")(0)._2 + " refused")
+        UpdateServiceStore.removeWidgetId(wId)
+        return errorRemoteView
+      }
+      case e: java.net.NoRouteToHostException => {
+        Log.d(TAG, "It seems internet connection goes down")
+      }
+      case _ => {
+        val errorRemoteView = new RemoteViews(context.getPackageName(),R.layout.small_widget_error)
+        errorRemoteView.setTextViewText(R.id.widgetError,"Unknow error")
+        UpdateServiceStore.removeWidgetId(wId)
+        return errorRemoteView
+      }
+    }
     val remoteView = new RemoteViews(context.getPackageName(),R.layout.small_widget )
 
-    if(events != None) {
-
+    if(events != None) 
+    {
       if(events.get("severity5") == "0"){
         remoteView.setInt(R.id.severity5Img, "setAlpha", 100);
         remoteView.setInt(R.id.severity5Box, "setBackgroundResource", R.drawable.severity5_background_noevent);
@@ -156,55 +175,92 @@ class UpdateService extends Service   with  Actor {
         remoteView.setInt(R.id.severity3Box, "setBackgroundResource", R.drawable.severity3_background);
       } 
       remoteView.setTextViewText(R.id.severity3, events.get("severity3"))
-    } 
+     
+    }
+    val alarmManager = getSystemService(Context.ALARM_SERVICE).asInstanceOf[AlarmManager]
+
+    var time = new Time();
+    val updateEvery = zp.get.filter(_._1 =="update")(0)._2.toInt
+    time.set(System.currentTimeMillis() + updateEvery)
+    val nextUpdate = time.toMillis(false)
+
+    val updateIntent = new Intent(ACTION_UPDATE_ALL)
+    updateIntent.setClass(this, classOf[UpdateService])
+
+    val pendingIntent = PendingIntent.getService(this, 0, updateIntent, 0);
+    alarmManager.set(AlarmManager.RTC, nextUpdate, pendingIntent) 
+
+
+
     remoteView 
   }
 
 
-  def getLastEvent(context: Context) : Option[Map[String, String]] = 
+  def getLastEvent(context: Context, wId:Int) : Option[Map[String, String]] = 
   { 
-
+    val zp = ZenPreferences.loadPref(context, wId)
+    if ( zp == None)
+    {
+      UpdateServiceStore.removeWidgetId(wId)
+      return Some(Map("severity5" -> "0", "severity4" -> "0", "severity3" -> "0"))
+    }
     try 
     {
-      //val dh = new UserData(context)
-      //val saved_date = dh.selectAll 
-      //if(saved_date != List()){
-      if( 1 == 1){
+          val url  = zp.get.filter(_._1 =="url")(0)._2
+          val user = zp.get.filter(_._1 =="user")(0)._2 
+          val pass = zp.get.filter(_._1 =="pass")(0)._2 
+           
           Log.w("Widgets", "Login to Zenoss")
-          //val zen = new ZenossAPI(saved_date(0)("url"), saved_date(0)("username"), saved_date(0)("password"))
-          val zen = new ZenossAPI("https://monitoring.com", "milad", "")
-          Log.w("Widgets", "**************************************Logininig to Zenoss")
+          val zen = new ZenossAPI(url, user, pass)
           if(zen.auth == false) 
               return None
-        Log.w("Widgets", "============*******************before request to Zenoss")
         val jOpt = zen.eventsQuery
-        Log.w("Widgets", "============*******************after request to Zenoss")
         if (jOpt == None)
           return None
         val jEvent = jOpt.get
         var severity5 = 0
         var severity4 = 0
         var severity3 = 0
-        
+        val match_d = zp.get.filter(_._1 =="match")(0)._2
         if(jEvent.has("result") && jEvent.getJSONObject("result").has("events")){
           val events = jEvent.getJSONObject("result").getJSONArray("events")
           for(i <- 0 to  events.length -1 ){
             val JO = new JSONObject( events.get(i).toString) 
-            if(JO.has("severity")){
-              JO.getString("severity") match {
-                case "5" => severity5 += 1
-                case "4" => severity4 += 1
-                case "3" => severity3 += 1
+            //TODO make a method for this shits
+            if(JO.has("device") && JO.getJSONObject("device").has("text"))
+            {
+              var hostname = JO.getJSONObject("device").getString("text").trim
+              if(match_d == "") {
+                if(JO.has("severity")){
+                  JO.getString("severity") match {
+                    case "5" => severity5 += 1
+                    case "4" => severity4 += 1
+                    case "3" => severity3 += 1
+                  }
+                }
+              }else {
+                match_d.split(",").foreach {
+                  case str => {
+                    if ("""%s""".format(str.trim).r.findAllIn(hostname).toSeq.length != 0){
+                      if(JO.has("severity")){
+                        JO.getString("severity") match {
+                          case "5" => severity5 += 1
+                          case "4" => severity4 += 1
+                          case "3" => severity3 += 1
+                        }
+                      }
+                    }
+                  }
+                }
               }
             }
           }
             return Some(Map("severity5" -> severity5.toString, "severity4" -> severity4.toString, "severity3" -> severity3.toString))
           }
         
-      }
     } catch { 
-        case e => e.printStackTrace()
-    }
+        case e =>  throw e;
+   }
 
           return None
     }

@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?> 
-<TableLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="fill_parent" android:layout_height="fill_parent" android:stretchColumns="1">
+<TableLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:stretchColumns="1">
 <TableRow> 
 <TextView android:text="URL:" /> 
 <EditText android:id="@+id/url" android:layout_span="3"/> 
@@ -26,6 +30,13 @@
 </Spinner>
 </TableRow>
 
+
+<TextView
+    android:id="@+id/widget149"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="TextView"
+    />
 <View android:layout_height="2px" android:background="#0000FF" />
 <TableRow> <Button android:id="@+id/cancel"
 android:layout_column="2"

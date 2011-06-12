@@ -76,7 +76,6 @@ class ZenossEvents (url: String, cookie: String) {
   def eventsQuery : Option[JSONObject] = {
     val u = "/zport/dmd/evconsole_router"
     val l = """{"action":"EventsRouter","method":"query","data":[{"start":0,"limit":100,"dir":"DESC","sort":"severity","params":"{\"severity\":[5,4,3],\"eventState\":[0,1]}"}],"type":"rpc","tid":1}"""
-    Log.w("ZenossEvents", l)
     val res = HttpClient.Json("%s%s".format(url, u), new JSONObject(l), List(("Cookie", cookie)))
     if(res == None)
       return None
@@ -94,8 +93,6 @@ object HttpClient {
 
   def Json(url: String, data: JSONObject,  headers: List[(String, String)]): Option[(JSONObject, List[(String, String)])] = {
     val postHeader = ("Content-type", "application/json") :: ("Accept", "application/json") :: headers 
-    Log.w("JSOOOOOOOOOn","Send Jso0000000000000n requesti %s".format(data.toString))
-    Log.w("HttpClient", "I'm sending JSON request please wait...")
     val req = Request(url, data.toString, postHeader)
 
     if (req != None )
@@ -120,7 +117,6 @@ object HttpClient {
   def Request(url: String, data: String, headers: List[(String, String)]): Option[(String, List[(String, String)])] = {
     try 
     {
-      Log.w("HttpClient", "I'm processing Request ... %s".format(data))
       val httpclient = new DefaultHttpClient()
       Log.w("HttpClient", "I'm removing http redirect handler ")
       httpclient.getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false)
@@ -172,8 +168,8 @@ object HttpClient {
 
     } catch {
       case e => 
-        //throw e
- e.printStackTrace();
+        e.printStackTrace();
+        throw e
     }
     return None
   }

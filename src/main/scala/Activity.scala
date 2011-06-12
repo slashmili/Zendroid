@@ -4,7 +4,6 @@ import _root_.android.app.Activity
 import _root_.android.os.Bundle
 import _root_.android.view.View
 import _root_.android.widget.{TextView, Button, Spinner, ArrayAdapter}
-import _root_.android.util.Log
 import java.util.Date
 
 
@@ -68,7 +67,6 @@ class MainActivity extends Activity  {
       txtUrl.setText(saved_date(0)("url"))
       txtUsername.setText(saved_date(0)("username"))
       txtPassword.setText(saved_date(0)("password"))
-      Log.w("Hi I have data", saved_date.toString)
      }
   }
 
