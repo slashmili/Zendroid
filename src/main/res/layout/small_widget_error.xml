@@ -13,7 +13,7 @@
     android:layout_height="wrap_content"
     android:textSize="10sp"
     android:textColor="#000000" 
-    android:text="Click here to config your widget"
+    android:text="Loading Zendroid configuration"
     />
 
 </LinearLayout>

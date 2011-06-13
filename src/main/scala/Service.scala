@@ -16,10 +16,11 @@ import scala.actors.Actor
 import android.appwidget.AppWidgetManager;
 import android.net.Uri
 import org.apache.http.conn.HttpHostConnectException
-
+import org.apache.http.conn.ConnectTimeoutException
 import javax.net.ssl.SSLException
 import java.net.UnknownHostException
-
+import java.io.IOException
+import java.net.SocketException
 
 import _root_.android.widget.RemoteViews;
 import _root_.android.util.Log
@@ -135,8 +136,17 @@ class UpdateService extends Service   with  Actor {
         UpdateServiceStore.removeWidgetId(wId)
         return errorRemoteView
       }
+      case e: org.apache.http.conn.ConnectTimeoutException => {
+        Log.d(TAG, "It seems internet connection goes down, or server doesn't response")
+      }
       case e: java.net.NoRouteToHostException => {
         Log.d(TAG, "It seems internet connection goes down")
+      }
+      case e: java.io.IOException => {
+        Log.d(TAG, "IOException ! try again later")
+      }
+      case e: java.net.SocketException => {
+        Log.d(TAG, "IOException ! try again later")
       }
       case _ => {
         val errorRemoteView = new RemoteViews(context.getPackageName(),R.layout.small_widget_error)
@@ -188,7 +198,7 @@ class UpdateService extends Service   with  Actor {
     updateIntent.setClass(this, classOf[UpdateService])
 
     val pendingIntent = PendingIntent.getService(this, 0, updateIntent, 0);
-    alarmManager.set(AlarmManager.RTC, nextUpdate, pendingIntent) 
+    alarmManager.set(AlarmManager.RTC_WAKEUP, nextUpdate, pendingIntent)
 
 
 
