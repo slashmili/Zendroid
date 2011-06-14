@@ -1,45 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?> 
-<TableLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:stretchColumns="1">
-<TableRow> 
-<TextView android:text="URL:" /> 
-<EditText android:id="@+id/url" android:layout_span="3"/> 
-</TableRow>
-
-<TableRow> 
-<TextView android:text="Username:" /> 
-<EditText android:id="@+id/username" android:layout_span="3"/> 
-</TableRow>
-<TableRow> 
-<TextView android:text="Password:" /> 
-<EditText android:id="@+id/password" 
-    android:layout_span="3"
-    android:password="true"
-    /> 
-</TableRow>
-
-<TableRow> 
-<TextView android:text="Update Every:" /> 
-<Spinner
-    android:id="@+id/every"
-     android:layout_span="3"
-    >
-</Spinner>
-</TableRow>
 
 
-<TextView
-    android:id="@+id/widget149"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="TextView"
-    />
-<View android:layout_height="2px" android:background="#0000FF" />
-<TableRow> <Button android:id="@+id/cancel"
-android:layout_column="2"
-android:text="Cancel" /> <Button android:id="@+id/ok"
-android:text="OK" /> </TableRow>
-</TableLayout>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+            android:layout_width="fill_parent"
+                android:layout_height="fill_parent">
+
+   <TextView android:text="For using this application press menu in Android desktop and add zendroid widget to your desktop\n" android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            /> 
+
+
+        <TextView 
+            android:text="This is a free software application, source is available in https://github.com/slashmili/Zendroid\n" 
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            /> 
+
+
+<Button
+     android:id="@+id/ok"
+     android:layout_height="wrap_content"
+     android:layout_width="fill_parent"
+     android:text="If you like this appliction, buy me a Beer !"
+     android:drawableTop="@drawable/buy_me_beer" />
+<!-- drawable/buy_me_beer -->
+
+</LinearLayout>

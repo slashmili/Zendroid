@@ -11,7 +11,7 @@ class Parent(info: ProjectInfo) extends ParentProject(info) {
   lazy val tests = project("tests",  "tests", new TestProject(_), main)
 
   class MainProject(info: ProjectInfo) extends AndroidProject(info) with Defaults with MarketPublish with TypedResources {
-    val keyalias  = "change-me"
+    val keyalias  = "Zendroid"
     val scalatest = "org.scalatest" % "scalatest" % "1.3" % "test"
   }
 
