@@ -46,7 +46,7 @@
     android:id="@+id/widget149"
 
 android:layout_span="3"
-    android:text="Use , between your regex"
+    android:text="Use , between hostname"
     />
 </TableRow> 
 

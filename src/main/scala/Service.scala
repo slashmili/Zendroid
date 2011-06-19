@@ -110,31 +110,23 @@ class UpdateService extends Service   with  Actor {
     val zp = ZenPreferences.loadPref(context, wId)
     if ( zp == None){
       val errorRemoteView = new RemoteViews(context.getPackageName(),R.layout.small_widget_error)
-      errorRemoteView.setTextViewText(R.id.widgetError,"Waiting for initial loading")
+      errorRemoteView.setTextViewText(R.id.widgetError,"Loading ...")
       UpdateServiceStore.removeWidgetId(wId)
       return errorRemoteView
     }
+    var errorText = ""
     var events: Option[Map[String, String]] = None
     try {
       events = getLastEvent(context, wId)
     }catch {
       case e :javax.net.ssl.SSLException => {
-        val errorRemoteView = new RemoteViews(context.getPackageName(),R.layout.small_widget_error)
-        errorRemoteView.setTextViewText(R.id.widgetError,"Your domain doesn't have valid ssl")
-        UpdateServiceStore.removeWidgetId(wId)
-        return errorRemoteView
+        errorText="Your domain doesn't have valid ssl"
       }
       case e:java.net.UnknownHostException => {
-        val errorRemoteView = new RemoteViews(context.getPackageName(),R.layout.small_widget_error)
-        errorRemoteView.setTextViewText(R.id.widgetError,"Cann't find host " + zp.get.filter(_._1 =="url")(0)._2 + ", delete it and create new one!")
-        UpdateServiceStore.removeWidgetId(wId)
-        return errorRemoteView
+        errorText="Can't find host " + zp.get.filter(_._1 =="url")(0)._2  
       }
       case e:org.apache.http.conn.HttpHostConnectException => {
-        val errorRemoteView = new RemoteViews(context.getPackageName(),R.layout.small_widget_error)
-        errorRemoteView.setTextViewText(R.id.widgetError,"Conenction to " + zp.get.filter(_._1 =="url")(0)._2 + " refused")
-        UpdateServiceStore.removeWidgetId(wId)
-        return errorRemoteView
+        errorText="Conenction to " + zp.get.filter(_._1 =="url")(0)._2 + " refused" 
       }
       case e: org.apache.http.conn.ConnectTimeoutException => {
         Log.d(TAG, "It seems internet connection goes down, or server doesn't response")
@@ -148,11 +140,8 @@ class UpdateService extends Service   with  Actor {
       case e: java.net.SocketException => {
         Log.d(TAG, "IOException ! try again later")
       }
-      case _ => {
-        val errorRemoteView = new RemoteViews(context.getPackageName(),R.layout.small_widget_error)
-        errorRemoteView.setTextViewText(R.id.widgetError,"Unknow error")
-        UpdateServiceStore.removeWidgetId(wId)
-        return errorRemoteView
+      case e => {
+        errorText="Unkown Error " + e.toString
       }
     }
     val remoteView = new RemoteViews(context.getPackageName(),R.layout.small_widget )
@@ -187,12 +176,14 @@ class UpdateService extends Service   with  Actor {
       remoteView.setTextViewText(R.id.severity3, events.get("severity3"))
      
     }
+    
     val alarmManager = getSystemService(Context.ALARM_SERVICE).asInstanceOf[AlarmManager]
 
     var time = new Time();
     val updateEvery = zp.get.filter(_._1 =="update")(0)._2.toInt
     time.set(System.currentTimeMillis() + updateEvery)
     val nextUpdate = time.toMillis(false)
+      Log.d("UpdateService", " ****************** update <" + nextUpdate + "> Later (" + time.format("%R") + ")")
 
     val updateIntent = new Intent(ACTION_UPDATE_ALL)
     updateIntent.setClass(this, classOf[UpdateService])
@@ -200,8 +191,12 @@ class UpdateService extends Service   with  Actor {
     val pendingIntent = PendingIntent.getService(this, 0, updateIntent, 0);
     alarmManager.set(AlarmManager.RTC_WAKEUP, nextUpdate, pendingIntent)
 
-
-
+    if(errorText != ""){
+      remoteView.setTextViewText(R.id.widgetError, "%s ,Next update: %s".format(errorText,time.format("%R")))
+    }
+    else {
+      remoteView.setTextViewText(R.id.widgetError, "")
+    }
     remoteView 
   }
 

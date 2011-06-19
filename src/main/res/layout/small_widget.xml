@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+	android:orientation="vertical" 
+	android:layout_width="wrap_content" 
+	android:layout_height="wrap_content" 
+	android:id="@+id/widgetHolder">
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="wrap_content"
@@ -102,4 +108,27 @@
             >
         </TextView>
     </LinearLayout>
+    </LinearLayout>
+
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+        android:orientation="horizontal" 
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:background="@drawable/small_widget_error_background"  
+        android:id="@+id/WidgetErrorBox">
+
+    <TextView
+        android:id="@+id/widgetError"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="10sp"
+        android:textColor="#000000" 
+        android:text="Loading Zendroid configuration"
+        />
+
+    </LinearLayout>
+
+
+
 </LinearLayout>
