@@ -1,8 +1,11 @@
-How To install :
+How To install
+==============
 
-    1. android market
+1. Go to Android market and install [Zendroid](https://market.android.com/details?id=com.github.slashmili.Zendroid&feature=search_result)
 
-    2. compile it
+2. Compile it from source
 
 
-(https://lh3.googleusercontent.com/-qMi-I_nO6eI/Teu0W4sUyiI/AAAAAAAAAX0/KOUo7thL2CA/s288/zendroid-ss.png)
+Screenshot
+==============
+![Zendroid](http://lh3.googleusercontent.com/-qMi-I_nO6eI/Teu0W4sUyiI/AAAAAAAAAX0/KOUo7thL2CA/s288/zendroid-ss.png)
