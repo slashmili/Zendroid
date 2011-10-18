@@ -22,8 +22,11 @@ import java.net.UnknownHostException
 import java.io.IOException
 import java.net.SocketException
 
+//Notification
+import android.app.NotificationManager
+import android.app.Notification
+
 import _root_.android.widget.RemoteViews;
-import _root_.android.util.Log
 import _root_.org.json.JSONObject
 
 import android.content.ComponentName;
@@ -35,6 +38,20 @@ import ZenossEvents._
 import com.github.slashmili.Zendroid.R
 import com.github.slashmili.Zendroid.MainActivity
 
+object EventContainer {
+  var eventIDs:List[String] = List()
+  def append(evid: String) = {
+    eventIDs ::=evid
+  }
+
+  def contains(evid: String): Boolean  = {
+    if ( eventIDs.filter( _ == evid).length == 1)
+      return true
+    else 
+      return false
+    //return eventIDs.contains(eventIDs)
+  }
+}
 object UpdateServiceStore {
   var widgetsId:List[Int] = List()
   def appendWidgetId(wid: Int) = {
@@ -117,6 +134,7 @@ class UpdateService extends Service   with  Actor {
     var errorText = ""
     var events: Option[Map[String, String]] = None
     try {
+      //showNotification     
       events = getLastEvent(context, wId)
     }catch {
       case e :javax.net.ssl.SSLException => {
@@ -234,13 +252,15 @@ class UpdateService extends Service   with  Actor {
             //TODO make a method for this shits
             if(JO.has("device") && JO.getJSONObject("device").has("text"))
             {
-              var hostname = JO.getJSONObject("device").getString("text").trim
+              val hostname   = JO.getJSONObject("device").getString("text").trim
+              val errorText  = JO.getString("summary")
+              val eventId    = JO.getString("evid")
               if(match_d == "") {
                 if(JO.has("severity")){
                   JO.getString("severity") match {
-                    case "5" => severity5 += 1
-                    case "4" => severity4 += 1
-                    case "3" => severity3 += 1
+                    case "5" => severity5 += 1 ; showNotification(eventId, hostname,errorText, 5) ; 
+                    case "4" => severity4 += 1 ; showNotification(eventId, hostname,errorText, 4);
+                    case "3" => severity3 += 1 ; showNotification(eventId, hostname,errorText, 3);
                   }
                 }
               }else {
@@ -268,6 +288,33 @@ class UpdateService extends Service   with  Actor {
    }
 
           return None
+    }
+
+
+    def showNotification (eventId: String,hostname: String, summary: String, severity: Int ) = {
+      if (!EventContainer.contains(eventId)){
+
+        val ns = Context.NOTIFICATION_SERVICE;
+        val nm = getSystemService(ns).asInstanceOf[NotificationManager]
+        val host = "Zendroid: " + hostname 
+        val sum  = hostname + ": " + summary
+        var icon = 0 
+        if (severity == 3) 
+          icon  = R.drawable.severity3_notify
+        if (severity  == 4)
+          icon   = R.drawable.severity4_notify
+        if (severity == 5)
+          icon   = R.drawable.severity5_notify
+
+        val notification = new Notification(icon, sum, System.currentTimeMillis());
+
+        val contentIntent = PendingIntent.getActivity(this, 0,
+          new Intent(this, classOf[UpdateService]), 0)
+        notification.setLatestEventInfo(this, host, sum, contentIntent);
+        notification.defaults |= Notification.DEFAULT_SOUND
+        nm.notify(eventId, severity, notification);
+        EventContainer.append(eventId)
+      }
     }
 
 }

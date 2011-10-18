@@ -8,3 +8,5 @@ log/*
 *.tmproj
 *.iml
 *.ipr
+.classpath
+.project

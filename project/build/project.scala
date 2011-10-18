@@ -8,12 +8,12 @@ class Parent(info: ProjectInfo) extends ParentProject(info) {
   override def updateAction = task { None }
 
   lazy val main  = project(".", "Zendroid", new MainProject(_))
-  lazy val tests = project("tests",  "tests", new TestProject(_), main)
+  //lazy val tests = project("tests",  "tests", new TestProject(_), main)
 
   class MainProject(info: ProjectInfo) extends AndroidProject(info) with Defaults with MarketPublish with TypedResources {
     val keyalias  = "Zendroid"
     val scalatest = "org.scalatest" % "scalatest" % "1.3" % "test"
   }
 
-  class TestProject(info: ProjectInfo) extends AndroidTestProject(info) with Defaults
+  //class TestProject(info: ProjectInfo) extends AndroidTestProject(info) with Defaults
 }
