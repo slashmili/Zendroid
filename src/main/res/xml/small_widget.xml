@@ -6,9 +6,4 @@
     android:updatePeriodMillis="0"
     android:initialLayout="@layout/small_widget_error"
     >
-    <!--
-    
-    android:configure="com.github.slashmili.Zendroid.AppWidgetConfigure"
-    android:configure="com.github.slashmili.Zendroid.MainActivity" -->  
-
 </appwidget-provider>

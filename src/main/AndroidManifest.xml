@@ -15,7 +15,6 @@ android:versionName="0.1" android:versionCode="1" package="com.github.slashmili.
             </intent-filter>
                 <meta-data android:name="android.appwidget.provider" android:resource="@xml/small_widget" />
         </receiver>
-        <service android:name=".Services.UpdateService" />
         <service android:name=".Services.ZenossUpdateService" />
     </application>
 </manifest>

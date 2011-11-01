@@ -1,9 +1,7 @@
 package com.github.slashmili.Zendroid
 
 
-import android.content.Context;
-//import android.content.Intent;
-import android.content.SharedPreferences;
+import _root_.android.content.{Context, SharedPreferences}
 
 object ZendroidPreferences {
   val PREFS_NAME = "com.github.slashmili.Zendroid.ZenossConfig"
@@ -16,10 +14,10 @@ object ZendroidPreferences {
   val PREFIX_KEY_ON_WARNING   = "prefix_onwarning"
   val PREFIX_KEY_INVALID_SSL  = "prefix_invalidssl"
   val PREFIX_KEY_UPDATE_EVERY = "prefix_updateevery"
-  
-   // Write the prefix to the SharedPreferences object for this widget
+
+  // Write the prefix to the SharedPreferences object for this widget
   def savePref(context: Context, url: String, user: String, pass: String, onCritical: Int, onError:Int, onWarning:Int, match_d: String, invalidSSL:Int, updateEvery: Int) = {
-    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit();
+    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
     //Save
     prefs.putString(PREFIX_KEY_URL, url)
     prefs.putString(PREFIX_KEY_USER, user)
@@ -30,13 +28,13 @@ object ZendroidPreferences {
     prefs.putString(PREFIX_KEY_ON_WARNING, onWarning.toString)
     prefs.putString(PREFIX_KEY_INVALID_SSL, invalidSSL.toString)
     prefs.putString(PREFIX_KEY_UPDATE_EVERY, updateEvery.toString)
-    prefs.commit();
+    prefs.commit()
   }
 
   // Read the prefix from the SharedPreferences object for this widget.
   // If there is no preference saved, return None
   def loadPref(context: Context):Option[Map[String,Any]] = {
-    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     //load
     val url         = prefs.getString(PREFIX_KEY_URL, null)
     val user        = prefs.getString(PREFIX_KEY_USER, null)

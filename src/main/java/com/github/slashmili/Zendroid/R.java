@@ -38,10 +38,8 @@ public final class R {
         public static final int WidgetErrorBox=0x7f07002c;
         public static final int btnGetLastStatus=0x7f07001f;
         public static final int btnSaveSettings=0x7f07001d;
-        public static final int cancel_button=0x7f070034;
         public static final int editText4=0x7f07000c;
         public static final int ok=0x7f070020;
-        public static final int ok_button=0x7f070035;
         public static final int severity3=0x7f07002b;
         public static final int severity3Box=0x7f070029;
         public static final int severity3Img=0x7f07002a;
@@ -80,21 +78,14 @@ public final class R {
         public static final int txtZenossPass=0x7f070009;
         public static final int txtZenossURL=0x7f070003;
         public static final int txtZenossUser=0x7f070006;
-        public static final int widget149=0x7f070033;
         public static final int widgetError=0x7f07002d;
         public static final int widgetHolder=0x7f070021;
-        public static final int widgetconf_match=0x7f070032;
-        public static final int widgetconf_pass=0x7f070030;
-        public static final int widgetconf_update=0x7f070031;
-        public static final int widgetconf_url=0x7f07002e;
-        public static final int widgetconf_user=0x7f07002f;
     }
     public static final class layout {
         public static final int global_configuration=0x7f030000;
         public static final int main=0x7f030001;
         public static final int small_widget=0x7f030002;
         public static final int small_widget_error=0x7f030003;
-        public static final int widget_configure=0x7f030004;
     }
     public static final class string {
         public static final int app_name=0x7f060000;

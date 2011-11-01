@@ -9,10 +9,6 @@ import _root_.android.net.Uri
 
 import java.util.Date
 
-
-import Storage.UserData
-
-
 class MainActivity extends Activity  {
   var btnOK: Button  = _
   var txtUsername: TextView = _
