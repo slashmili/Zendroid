@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:layout_gravity="center"
+    android:gravity="center_vertical">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:stretchColumns="1"
+    >
+    <TableLayout android:id="@+id/tableLayout1"  android:layout_height="wrap_content" android:layout_weight="0.37" android:layout_width="fill_parent">
+        <TableRow android:id="@+id/tableRow1" android:layout_width="wrap_content" android:layout_height="wrap_content">
+            <TextView android:text="URL : " android:id="@+id/textView1"  android:layout_height="wrap_content" android:layout_gravity="center_vertical" ></TextView>
+            <EditText  
+            	android:layout_weight="1" 
+            	android:inputType="textEmailAddress" 
+            	android:singleLine="true" 
+            	android:layout_height="wrap_content" 
+            	android:hint="https://monitoring.zenoss.org" 
+            	android:id="@+id/txtZenossURL" 
+            	android:layout_width="fill_parent">
+                <requestFocus></requestFocus>
+            </EditText>
+            
+        </TableRow>
+        <TableRow android:id="@+id/tableRow2" android:layout_width="wrap_content" android:layout_height="wrap_content">
+            <TextView android:text="Username : " android:id="@+id/textView2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center_vertical"></TextView>
+            <EditText 
+            	android:id="@+id/txtZenossUser" 
+            	android:layout_width="wrap_content" 
+            	android:layout_height="wrap_content"
+            	android:hint="admin"
+                android:layout_weight="1"
+                android:singleLine="true" 
+                ></EditText>
+            
+        </TableRow>
+        <TableRow android:id="@+id/tableRow3" android:layout_width="wrap_content" android:layout_height="wrap_content">
+            <TextView android:text="Password : " android:id="@+id/textView3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center_vertical"></TextView>
+            <EditText 
+            	android:layout_width="wrap_content"  
+            	android:id="@+id/txtZenossPass" 
+            	android:layout_height="wrap_content"
+            	android:singleLine="true"
+            	android:hint="admin"
+            	android:layout_weight="1"
+                android:password="true"
+            	></EditText>
+        </TableRow>
+        <TableRow android:id="@+id/tableRow4" android:layout_width="wrap_content" android:layout_height="wrap_content">
+            <TextView android:text="State : " android:id="@+id/textView4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center_vertical"></TextView>
+            <EditText android:layout_width="wrap_content" android:enabled="false" android:layout_height="wrap_content" android:text="Production" android:id="@+id/editText4"
+            android:layout_weight="1"
+            ></EditText>
+        </TableRow>
+        <TableRow android:layout_height="wrap_content" android:id="@+id/tableRow5" android:layout_width="wrap_content" android:baselineAligned="true">
+         <TextView android:text="On Critical : " android:id="@+id/textView5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center_vertical"></TextView>
+        
+             <Spinner android:id="@+id/spnOnCritical" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_weight="1"></Spinner>
+      
+         
+        </TableRow>
+        <TableRow android:id="@+id/tableRow7" android:layout_width="wrap_content" android:layout_height="wrap_content">
+            <TextView android:text="On Error: " android:id="@+id/textView6" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center_vertical"></TextView>
+            <Spinner android:id="@+id/spnOnError" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_weight="1"></Spinner>
+
+
+        </TableRow>
+        <TableRow android:id="@+id/tableRow8" android:layout_width="wrap_content" android:layout_height="wrap_content">
+            <TextView android:layout_width="wrap_content" android:id="@+id/textView7" android:text="On Warning : " android:layout_height="wrap_content" android:layout_gravity="center_vertical"></TextView>
+            <Spinner android:id="@+id/spnOnWarning" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_weight="1"></Spinner>
+        </TableRow>
+        <TableRow android:id="@+id/tableRow9" android:layout_width="wrap_content" android:layout_height="wrap_content">
+            <TextView android:layout_width="wrap_content" android:id="@+id/textView8" android:text="Update Every : " android:layout_height="wrap_content" android:layout_gravity="center_vertical"></TextView>
+            <Spinner android:id="@+id/spnUpdateEvery" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_weight="1"></Spinner>
+        </TableRow>
+        <TableRow android:id="@+id/tableRow10" android:layout_width="wrap_content" android:layout_height="wrap_content">
+            <TextView android:layout_width="wrap_content" android:id="@+id/textView9" android:text="Match Device : " android:layout_height="wrap_content" android:layout_gravity="center_vertical"></TextView>
+            <EditText 
+            	android:id="@+id/txtMatchDevice" 
+            	android:layout_width="wrap_content" 
+            	android:layout_height="wrap_content" 
+            	android:layout_weight="1" 
+            	android:hint="servername, serverUK[1-9]"
+            	android:singleLine="true">
+            	</EditText>
+        </TableRow>
+        
+        <TableRow android:id="@+id/tableRow11" android:layout_width="wrap_content" android:layout_height="wrap_content">
+              <Button 
+              	android:text="Save Settings and Reload Service" 
+              	android:id="@+id/btnSaveSettings" 
+              	android:layout_width="fill_parent" 
+              	android:layout_height="wrap_content" 
+              	android:singleLine="true"
+                android:layout_span="2"
+                android:layout_weight="1"
+                >
+                </Button>
+       
+       </TableRow>
+       <TableRow android:id="@+id/tableRow12" android:layout_width="wrap_content" android:layout_height="wrap_content">
+              <Button 
+              	android:text="Last Status" 
+              	android:id="@+id/btnGetLastStatus" 
+              	android:layout_width="fill_parent" 
+              	android:layout_height="wrap_content" 
+              	android:singleLine="true"
+                android:layout_span="2"
+                android:layout_weight="1"
+                >
+                </Button>
+       
+       </TableRow>
+
+    </TableLayout>
+</LinearLayout>
+</ScrollView>

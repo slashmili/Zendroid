@@ -53,7 +53,7 @@ class AppWidgetConfigure extends Activity with  AdapterView.OnItemSelectedListen
     val extras  = intent.getExtras()
     if (extras != null) {
       mAppWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
-      UpdateServiceStore.removeWidgetId(mAppWidgetId)
+      //UpdateServiceStore.removeWidgetId(mAppWidgetId)
     }
 
     // If they gave us an intent without the widget id, just bail.
@@ -97,6 +97,7 @@ class AppWidgetConfigure extends Activity with  AdapterView.OnItemSelectedListen
   }
   val mOnClickListener = new View.OnClickListener() {
      def onClick(v: View): Unit = {
+       /*
        val  context = AppWidgetConfigure.this
 
        val url = urlWidget.getText().toString()
@@ -118,6 +119,7 @@ class AppWidgetConfigure extends Activity with  AdapterView.OnItemSelectedListen
 
         resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
         setResult(Activity.RESULT_OK, resultValue);
+        */
         finish();
       }
    }

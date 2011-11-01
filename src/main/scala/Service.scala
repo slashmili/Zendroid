@@ -29,7 +29,8 @@ import android.app.Notification
 import _root_.android.widget.RemoteViews;
 import _root_.org.json.JSONObject
 
-import android.content.ComponentName;
+import android.content.ComponentName
+import android.content.ServiceConnection
 import com.github.slashmili.Zendroid.utils._
 import com.github.slashmili.Zendroid.{ZenPreferences, AppWidgetConfigure}
 import ZenossEvents._
@@ -38,200 +39,247 @@ import ZenossEvents._
 import com.github.slashmili.Zendroid.R
 import com.github.slashmili.Zendroid.MainActivity
 
-object EventContainer {
-  var eventIDs:List[String] = List()
-  def append(evid: String) = {
-    eventIDs ::=evid
-  }
+import com.github.slashmili.Zendroid.GlobalConfiguration
+import com.github.slashmili.Zendroid.ZendroidPreferences
 
-  def contains(evid: String): Boolean  = {
-    if ( eventIDs.filter( _ == evid).length == 1)
-      return true
-    else 
-      return false
-    //return eventIDs.contains(eventIDs)
+import android.app.IntentService;
+
+
+object ServiceRunner { 
+  var alarmManager:AlarmManager = _
+  var service:ZenossUpdateService = _
+  var criticalEvent = 0
+  var errorEvent    = 0 
+  var warninigEvent = 0
+  var errorMessage = ""
+  var started      = false
+  var nextTime = new Time()
+  
+  def startService (context: Context) = {
+    started = true
+    context.startService(new Intent(context, classOf[ZenossUpdateService]))
   }
-}
-object UpdateServiceStore {
-  var widgetsId:List[Int] = List()
-  def appendWidgetId(wid: Int) = {
-    if ( widgetsId.filter(_ == wid).length == 0)
-      widgetsId ::= wid
-    Log.d("UpdateService", "widget with id " + wid.toString + " is added")
-  }
+  
+  object WdigetStore {
+	  var widgetsId:List[Int] = List()
+	  def appendWidgetId(wid: Int) = {
+	    if ( widgetsId.filter(_ == wid).length == 0)
+	      widgetsId ::= wid
+	    Log.d("UpdateService", "widget with id " + wid.toString + " is added")
+	  }
+	 
+	  def removeWidgetId(wid: Int) = {
+	    widgetsId = widgetsId.filter(_ != wid)
+	    Log.d("UpdateService", "widget with id " + wid.toString + " is removed")
+	  }
+	
+	  def getWidgetsIds = widgetsId
+	  def isActive: Boolean = {
+	    if (widgetsId.length == 0)
+	      return false
+	    return true
+	  }
  
-  def removeWidgetId(wid: Int) = {
-    widgetsId = widgetsId.filter(_ != wid)
-    Log.d("UpdateService", "widget with id " + wid.toString + " is removed")
-  }
-
-  def getWidgetsIds = widgetsId
-  def isActive: Boolean = {
-    if (widgetsId.length == 0)
-      return false
-    return true
-  }
+	def updateWidget(context: Context): RemoteViews = {
+	    def getLastEvent() : Option[Map[String, String]] = {
+          return Some(Map("severity5" -> ServiceRunner.criticalEvent.toString, "severity4" -> ServiceRunner.errorEvent.toString, "severity3" -> ServiceRunner.warninigEvent.toString))
+        }
+	    val TAG = "Remove me !"
+	    val zp = ZendroidPreferences.loadPref(context)
+	    if ( zp == None){
+	      val errorRemoteView = new RemoteViews(context.getPackageName(),R.layout.small_widget_error)
+	      errorRemoteView.setTextViewText(R.id.widgetError,"Loading ...")
+	      return errorRemoteView
+	    }
+	    var errorText = ""
+	    var events: Option[Map[String, String]] = None
+	    try {
+	      //showNotification     
+	      events = getLastEvent()
+	    }catch {
+	      case e :javax.net.ssl.SSLException => {
+	        errorText="Your domain doesn't have valid ssl"
+	      }
+	      case e:java.net.UnknownHostException => {
+	        errorText="Can't find host " + zp.get("url")  
+	      }
+	      case e:org.apache.http.conn.HttpHostConnectException => {
+	        errorText="Conenction to " + zp.get("url") + " refused" 
+	      }
+	      case e: org.apache.http.conn.ConnectTimeoutException => {
+	        Log.d(TAG, "It seems internet connection goes down, or server doesn't response")
+	      }
+	      case e: java.net.NoRouteToHostException => {
+	        Log.d(TAG, "It seems internet connection goes down")
+	      }
+	      case e: java.io.IOException => {
+	        Log.d(TAG, "IOException ! try again later")
+	      }
+	      case e: java.net.SocketException => {
+	        Log.d(TAG, "IOException ! try again later")
+	      }
+	      case e => {
+	        errorText="Unkown Error " + e.toString
+	      }
+	    }
+	    val remoteView = new RemoteViews(context.getPackageName(),R.layout.small_widget )
+	
+        val intentGlobalConfiguration = new Intent(context, classOf[GlobalConfiguration])
+        val pendingIntentGlobalConfiguration = PendingIntent.getActivity(context, 0, intentGlobalConfiguration, 0)
+	    if(events != None) 
+	    {
+	      if(events.get("severity5") == "0"){
+	        remoteView.setInt(R.id.severity5Img, "setAlpha", 100);
+	        remoteView.setInt(R.id.severity5Box, "setBackgroundResource", R.drawable.severity5_background_noevent);
+	      }else {
+	        remoteView.setInt(R.id.severity5Img, "setAlpha", 255);
+	        remoteView.setInt(R.id.severity5Box, "setBackgroundResource", R.drawable.severity5_background);
+	      }	      
+	      remoteView.setTextViewText(R.id.severity5, events.get("severity5"))
+	      remoteView.setOnClickPendingIntent(R.id.severity5, pendingIntentGlobalConfiguration)
+	      
+	      if(events.get("severity4") == "0"){
+	        remoteView.setInt(R.id.severity4Img, "setAlpha", 100);
+	        remoteView.setInt(R.id.severity4Box, "setBackgroundResource", R.drawable.severity4_background_noevent);
+	      }else {
+	        remoteView.setInt(R.id.severity4Img, "setAlpha", 255);
+	        remoteView.setInt(R.id.severity4Box, "setBackgroundResource", R.drawable.severity4_background);
+	      }
+	      remoteView.setTextViewText(R.id.severity4, events.get("severity4"))
+	      remoteView.setOnClickPendingIntent(R.id.severity4, pendingIntentGlobalConfiguration)
+	      
+	      if(events.get("severity3") == "0"){
+	        remoteView.setInt(R.id.severity3Img, "setAlpha", 100);
+	        remoteView.setInt(R.id.severity3Box, "setBackgroundResource", R.drawable.severity3_background_noevent);
+	      }else {
+	        remoteView.setInt(R.id.severity3Img, "setAlpha", 255);
+	        remoteView.setInt(R.id.severity3Box, "setBackgroundResource", R.drawable.severity3_background);
+	      }
+	      remoteView.setTextViewText(R.id.severity3, events.get("severity3"))
+	      remoteView.setOnClickPendingIntent(R.id.severity3, pendingIntentGlobalConfiguration)
+	    }
+	    
+	   errorText = ServiceRunner.errorMessage
+       if(errorText != ""){
+         remoteView.setTextViewText(R.id.widgetError, "I got an error for last run for more info go to zendroid and check 'Last Status'")
+       }
+       else {
+         remoteView.setTextViewText(R.id.widgetError, "")
+       }
+       remoteView.setOnClickPendingIntent(R.id.widgetError, pendingIntentGlobalConfiguration)
+       remoteView 
+	  }
+   }
+  
+	object EventStore {
+	  var eventIDs:List[String] = List()
+	  def append(evid: String) = {
+	    eventIDs ::=evid
+	  }
+	
+	  def contains(evid: String): Boolean  = {
+	    if ( eventIDs.filter( _ == evid).length == 1)
+	      return true
+	    else 
+	      return false
+	    //return eventIDs.contains(eventIDs)
+	  }
+	}
 }
-class UpdateService extends Service   with  Actor {
-    private val TAG = "Services.UpdateService" 
-    val ACTION_UPDATE_ALL = "com.github.slashmili.Zendroid.UPDATE_ALL"
-    def act() {
-        var appWidgetManager = AppWidgetManager.getInstance(this);
-        loop {
-          receive {
-            case i: Int =>  {
-              val info = appWidgetManager.getAppWidgetInfo(i)
-              val updateViews = updateWidget(this,i)
-              appWidgetManager.updateAppWidget(i, updateViews);
-
-            }
-            case s: String => exit()
-            case _ => Log.d(TAG, "I don't know this event")
-          }
-        }
-    }
-    override def onStart(intent: Intent, startId: Int) = {
-        if(UpdateServiceStore.isActive == true) {
-              this.start
-            if(ACTION_UPDATE_ALL == intent.getAction()){
-              Log.d(TAG, "updateing widgets : "  + UpdateServiceStore.getWidgetsIds.toString )
-            }else {
-            //TODO don't update this just
-            }
-              UpdateServiceStore.getWidgetsIds.foreach {
-                this ! _
-              }
-         // }
-          super.onStart(intent, startId)
-          this ! "stop"
 
 
-        }
-    }
-
-    override def onCreate = {
-      super.onCreate()
-       stopSelf();
-    }
-
-    override def onDestroy = {
-      super.onDestroy
-    }
-
-    override def onBind(intent: Intent) : IBinder = {
-      return null;
-    }
-
-
-  def updateWidget(context: Context, wId:Int): RemoteViews = {
-    val zp = ZenPreferences.loadPref(context, wId)
-    if ( zp == None){
-      val errorRemoteView = new RemoteViews(context.getPackageName(),R.layout.small_widget_error)
-      errorRemoteView.setTextViewText(R.id.widgetError,"Loading ...")
-      UpdateServiceStore.removeWidgetId(wId)
-      return errorRemoteView
-    }
-    var errorText = ""
-    var events: Option[Map[String, String]] = None
+class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
+	//super("ZenossUpdateService")    
+    override def onHandleIntent(intent: Intent) {
+    var appWidgetManager = AppWidgetManager.getInstance(this);
+    //val appWidgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS)
+    //val updateViews = updateWidget(this)
     try {
-      //showNotification     
-      events = getLastEvent(context, wId)
+        ServiceRunner.errorMessage = ""
+    	requestLastEvent(this)
     }catch {
-      case e :javax.net.ssl.SSLException => {
-        errorText="Your domain doesn't have valid ssl"
-      }
-      case e:java.net.UnknownHostException => {
-        errorText="Can't find host " + zp.get.filter(_._1 =="url")(0)._2  
-      }
-      case e:org.apache.http.conn.HttpHostConnectException => {
-        errorText="Conenction to " + zp.get.filter(_._1 =="url")(0)._2 + " refused" 
-      }
-      case e: org.apache.http.conn.ConnectTimeoutException => {
-        Log.d(TAG, "It seems internet connection goes down, or server doesn't response")
-      }
-      case e: java.net.NoRouteToHostException => {
-        Log.d(TAG, "It seems internet connection goes down")
-      }
-      case e: java.io.IOException => {
-        Log.d(TAG, "IOException ! try again later")
-      }
-      case e: java.net.SocketException => {
-        Log.d(TAG, "IOException ! try again later")
-      }
-      case e => {
-        errorText="Unkown Error " + e.toString
-      }
+      case e => ServiceRunner.errorMessage = e.toString
     }
-    val remoteView = new RemoteViews(context.getPackageName(),R.layout.small_widget )
 
-    if(events != None) 
-    {
-      if(events.get("severity5") == "0"){
-        remoteView.setInt(R.id.severity5Img, "setAlpha", 100);
-        remoteView.setInt(R.id.severity5Box, "setBackgroundResource", R.drawable.severity5_background_noevent);
-      }else {
-        remoteView.setInt(R.id.severity5Img, "setAlpha", 255);
-        remoteView.setInt(R.id.severity5Box, "setBackgroundResource", R.drawable.severity5_background);
-      }
-      remoteView.setTextViewText(R.id.severity5, events.get("severity5"))
-
-      if(events.get("severity4") == "0"){
-        remoteView.setInt(R.id.severity4Img, "setAlpha", 100);
-        remoteView.setInt(R.id.severity4Box, "setBackgroundResource", R.drawable.severity4_background_noevent);
-      }else {
-        remoteView.setInt(R.id.severity4Img, "setAlpha", 255);
-        remoteView.setInt(R.id.severity4Box, "setBackgroundResource", R.drawable.severity4_background);
-      }
-      remoteView.setTextViewText(R.id.severity4, events.get("severity4"))
-
-      if(events.get("severity3") == "0"){
-        remoteView.setInt(R.id.severity3Img, "setAlpha", 100);
-        remoteView.setInt(R.id.severity3Box, "setBackgroundResource", R.drawable.severity3_background_noevent);
-      }else {
-        remoteView.setInt(R.id.severity3Img, "setAlpha", 255);
-        remoteView.setInt(R.id.severity3Box, "setBackgroundResource", R.drawable.severity3_background);
-      } 
-      remoteView.setTextViewText(R.id.severity3, events.get("severity3"))
-     
-    }
+    //update other widgets
+    ServiceRunner.WdigetStore.getWidgetsIds.foreach {
+        val info = appWidgetManager.getAppWidgetInfo(_)
+        val updateViews = ServiceRunner.WdigetStore.updateWidget(this)
+        appWidgetManager.updateAppWidget(_, updateViews)
+    }   
+    	 
+    }  
+/*  override def onStart(intent: Intent, startId: Int) = {
     
-    val alarmManager = getSystemService(Context.ALARM_SERVICE).asInstanceOf[AlarmManager]
-
-    var time = new Time();
-    val updateEvery = zp.get.filter(_._1 =="update")(0)._2.toInt
-    time.set(System.currentTimeMillis() + updateEvery)
-    val nextUpdate = time.toMillis(false)
-      Log.d("UpdateService", " ****************** update <" + nextUpdate + "> Later (" + time.format("%R") + ")")
-
-    val updateIntent = new Intent(ACTION_UPDATE_ALL)
-    updateIntent.setClass(this, classOf[UpdateService])
-
-    val pendingIntent = PendingIntent.getService(this, 0, updateIntent, 0);
-    alarmManager.set(AlarmManager.RTC_WAKEUP, nextUpdate, pendingIntent)
-
-    if(errorText != ""){
-      remoteView.setTextViewText(R.id.widgetError, "%s ,Next update: %s".format(errorText,time.format("%R")))
+    //var appWidgetManager = AppWidgetManager.getInstance(this.getApplicationContext())
+    var appWidgetManager = AppWidgetManager.getInstance(this);
+    //val appWidgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS)
+    //val updateViews = updateWidget(this)
+    try {
+    	requestLastEvent(this)
+    	ServiceRunner.errorMessage = ""
+    }catch {
+      case e => ServiceRunner.errorMessage = e.toString
     }
-    else {
-      remoteView.setTextViewText(R.id.widgetError, "")
+
+    //update other widgets
+    ServiceRunner.WdigetStore.getWidgetsIds.foreach {
+        val info = appWidgetManager.getAppWidgetInfo(_)
+        val updateViews = ServiceRunner.WdigetStore.updateWidget(this)
+        appWidgetManager.updateAppWidget(_, updateViews)
     }
-    remoteView 
+  }
+  
+  override def onCreate = {
+    super.onCreate()
+    stopSelf();
   }
 
+  override def onDestroy = {
+    super.onDestroy
+  }
 
-  def getLastEvent(context: Context, wId:Int) : Option[Map[String, String]] = 
+  override def onBind(intent: Intent) : IBinder = {
+    return null;
+  }
+  */
+  def getLastEvent() : Option[Map[String, String]] = {
+    return Some(Map("severity5" -> ServiceRunner.criticalEvent.toString, "severity4" -> ServiceRunner.errorEvent.toString, "severity3" -> ServiceRunner.warninigEvent.toString))
+  }
+  
+  def requestLastEvent(context: Context) : Option[Map[String, String]] = 
   { 
-    val zp = ZenPreferences.loadPref(context, wId)
+    val zp = ZendroidPreferences.loadPref(context)
     if ( zp == None)
     {
-      UpdateServiceStore.removeWidgetId(wId)
+      ServiceRunner.criticalEvent = 0
+      ServiceRunner.errorEvent = 0
+      ServiceRunner.warninigEvent = 0    
       return Some(Map("severity5" -> "0", "severity4" -> "0", "severity3" -> "0"))
+    }
+    if(zp.get("update").toString.toInt == 0){
+      ServiceRunner.errorMessage = "Service Disabled"
+        return None
+    }
+    
+    //remove previous alarm
+    val ACTION_UPDATE_ALL = "com.github.slashmili.Zendroid.UPDATE_ALL"
+	val updateIntent = new Intent(ACTION_UPDATE_ALL)
+	updateIntent.setClass(this, classOf[ZenossUpdateService])
+	val pendingIntent = PendingIntent.getService(this, 0, updateIntent, 0);
+    Log.d("exxxxeption", " Before checking alaram")
+    if(ServiceRunner.alarmManager != Nil){
+	    try {
+	    	ServiceRunner.alarmManager.cancel(pendingIntent)
+	    }catch {
+	    	case e => Log.d("Service", "Tried to cancel alaram but faild, " + e.toString)
+	    }
     }
     try 
     {
-          val url  = zp.get.filter(_._1 =="url")(0)._2
-          val user = zp.get.filter(_._1 =="user")(0)._2 
-          val pass = zp.get.filter(_._1 =="pass")(0)._2 
+          val url  = zp.get("url").toString
+          val user = zp.get("user").toString
+          val pass = zp.get("pass").toString
            
           Log.w("Widgets", "Login to Zenoss")
           val zen = new ZenossAPI(url, user, pass)
@@ -244,7 +292,7 @@ class UpdateService extends Service   with  Actor {
         var severity5 = 0
         var severity4 = 0
         var severity3 = 0
-        val match_d = zp.get.filter(_._1 =="match")(0)._2
+        val match_d = zp.get("match").toString
         if(jEvent.has("result") && jEvent.getJSONObject("result").has("events")){
           val events = jEvent.getJSONObject("result").getJSONArray("events")
           for(i <- 0 to  events.length -1 ){
@@ -280,41 +328,72 @@ class UpdateService extends Service   with  Actor {
               }
             }
           }
-            return Some(Map("severity5" -> severity5.toString, "severity4" -> severity4.toString, "severity3" -> severity3.toString))
-          }
+	     ServiceRunner.criticalEvent = severity5
+	     ServiceRunner.errorEvent = severity4
+	     ServiceRunner.warninigEvent = severity3               
+         return Some(Map("severity5" -> severity5.toString, "severity4" -> severity4.toString, "severity3" -> severity3.toString))
+       }
         
     } catch { 
         case e =>  throw e;
-   }
-
-          return None
+   }finally {
+	   //set new alarm
+	   ServiceRunner.alarmManager = getSystemService(Context.ALARM_SERVICE).asInstanceOf[AlarmManager]
+	   ServiceRunner.nextTime = new Time();
+	   val updateEvery = zp.get("update").toString.toInt
+	   ServiceRunner.nextTime.set(System.currentTimeMillis() + updateEvery)
+	   val nextUpdate = ServiceRunner.nextTime.toMillis(false)
+	   ServiceRunner.alarmManager.set(AlarmManager.RTC_WAKEUP, nextUpdate, pendingIntent)   
+	   Log.d("UpdateService", " will be called Later (" + ServiceRunner.nextTime.format("%R") + ")")
     }
 
+    return None
+  }
 
     def showNotification (eventId: String,hostname: String, summary: String, severity: Int ) = {
-      if (!EventContainer.contains(eventId)){
+      val zp = ZendroidPreferences.loadPref(this)
+      if ( zp != None)
+      {
+    	var notificationState = severity match {
+        	case 5 => zp.get("on_critical").toString.toInt
+        	case 4 => zp.get("on_error").toString.toInt
+        	case 3 => zp.get("on_warning").toString.toInt
+        	case _ => 0
+    	}
+    	if (notificationState != 0)
+    	{  
 
-        val ns = Context.NOTIFICATION_SERVICE;
-        val nm = getSystemService(ns).asInstanceOf[NotificationManager]
-        val host = "Zendroid: " + hostname 
-        val sum  = hostname + ": " + summary
-        var icon = 0 
-        if (severity == 3) 
-          icon  = R.drawable.severity3_notify
-        if (severity  == 4)
-          icon   = R.drawable.severity4_notify
-        if (severity == 5)
-          icon   = R.drawable.severity5_notify
+    		if (!ServiceRunner.EventStore.contains(eventId)){
 
-        val notification = new Notification(icon, sum, System.currentTimeMillis());
-
-        val contentIntent = PendingIntent.getActivity(this, 0,
-          new Intent(this, classOf[UpdateService]), 0)
-        notification.setLatestEventInfo(this, host, sum, contentIntent);
-        notification.defaults |= Notification.DEFAULT_SOUND
-        nm.notify(eventId, severity, notification);
-        EventContainer.append(eventId)
+		        val ns = Context.NOTIFICATION_SERVICE;
+		        val nm = getSystemService(ns).asInstanceOf[NotificationManager]
+		        val host = "Zendroid: " + hostname 
+		        val sum  = hostname + ": " + summary
+		        var icon = 0 
+		        if (severity == 3) 
+		          icon  = R.drawable.severity3_notify
+		        if (severity  == 4)
+		          icon   = R.drawable.severity4_notify
+		        if (severity == 5)
+		          icon   = R.drawable.severity5_notify
+		
+		        val notification = new Notification(icon, sum, System.currentTimeMillis());
+		
+		        val contentIntent = PendingIntent.getActivity(this, 0,
+		          new Intent(this, classOf[ZenossUpdateService]), 0)
+		        notification.setLatestEventInfo(this, host, sum, contentIntent);
+		        //if set to make sound
+		        if(notificationState == 2)
+		          notification.defaults |= Notification.DEFAULT_SOUND
+		        nm.notify(eventId, severity, notification);
+		        ServiceRunner.EventStore.append(eventId)
+    		}
+    	}
       }
     }
+
+
+
+
 
 }

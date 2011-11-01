@@ -3,7 +3,7 @@ android:versionName="0.1" android:versionCode="1" package="com.github.slashmili.
  <uses-permission  android:name="android.permission.INTERNET" />
     <uses-sdk android:minSdkVersion="7"></uses-sdk>
     <application android:icon="@drawable/zendroid_icon" android:label="@string/app_name">
-        <activity android:label="@string/app_name" android:name=".MainActivity">
+        <activity android:label="@string/app_name" android:name=".GlobalConfiguration">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.LAUNCHER"></category>
@@ -15,12 +15,7 @@ android:versionName="0.1" android:versionCode="1" package="com.github.slashmili.
             </intent-filter>
                 <meta-data android:name="android.appwidget.provider" android:resource="@xml/small_widget" />
         </receiver>
-        <activity android:name=".AppWidgetConfigure">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
-            </intent-filter>
-        </activity>
         <service android:name=".Services.UpdateService" />
-
+        <service android:name=".Services.ZenossUpdateService" />
     </application>
 </manifest>

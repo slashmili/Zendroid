@@ -149,7 +149,8 @@ object HttpClient {
       Log.w("HttpClient", "I'm reading body")
       val entity = response.getEntity()
       var instream = entity.getContent()
-      if (response.getFirstHeader("Content-Encoding") != Nil && response.getFirstHeader("Content-Encoding").getValue == "gzip"){
+      //TODO: fixme : NULLpointer error try with google.com
+      if (response.containsHeader("Content-Encoding") == true && response.getFirstHeader("Content-Encoding").getValue == "gzip"){
         Log.w("HttpClient", "Opps! it's ziped, no worry I have my tools to decode it")
         instream = new GZIPInputStream(instream)
       }
