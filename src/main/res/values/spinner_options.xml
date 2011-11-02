@@ -11,5 +11,6 @@
         <item>Every 20 minutes</item>
         <item>Every 30 minutes</item>
         <item>Every 1 hour</item>
+        <item>Disable</item>
     </string-array>    
 </resources>

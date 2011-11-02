@@ -2,15 +2,17 @@ package com.github.slashmili.Zendroid
 
 
 import _root_.android.content.{Context, SharedPreferences}
+import _root_.com.androidsnippets.SimpleCrypto
 
 object ZendroidPreferences {
-  val PREFS_NAME = "com.github.slashmili.Zendroid.ZenossConfig"
+  val PREFS_NAME              = "com.github.slashmili.Zendroid.ZenossConfig"
+  val ENCRYPT_KEY             = "THISKEYNEVERCOMITTOGIT!"
   val PREFIX_KEY_URL          = "prefix_url"
   val PREFIX_KEY_USER         = "prefix_user"
   val PREFIX_KEY_PASS         = "prefix_pass"
   val PREFIX_KEY_MATCH        = "prefix_match"
   val PREFIX_KEY_ON_CRITICAL  = "prefix_oncritical"
-  val PREFIX_KEY_ON_ERROR	    = "prefix_onerror"
+  val PREFIX_KEY_ON_ERROR     = "prefix_onerror"
   val PREFIX_KEY_ON_WARNING   = "prefix_onwarning"
   val PREFIX_KEY_INVALID_SSL  = "prefix_invalidssl"
   val PREFIX_KEY_UPDATE_EVERY = "prefix_updateevery"
@@ -21,7 +23,7 @@ object ZendroidPreferences {
     //Save
     prefs.putString(PREFIX_KEY_URL, url)
     prefs.putString(PREFIX_KEY_USER, user)
-    prefs.putString(PREFIX_KEY_PASS, pass)
+    prefs.putString(PREFIX_KEY_PASS, SimpleCrypto.encrypt(ENCRYPT_KEY, pass))
     prefs.putString(PREFIX_KEY_MATCH, match_d)
     prefs.putString(PREFIX_KEY_ON_CRITICAL, onCritical.toString)
     prefs.putString(PREFIX_KEY_ON_ERROR, onError.toString)
@@ -38,7 +40,7 @@ object ZendroidPreferences {
     //load
     val url         = prefs.getString(PREFIX_KEY_URL, null)
     val user        = prefs.getString(PREFIX_KEY_USER, null)
-    val pass        = prefs.getString(PREFIX_KEY_PASS, null)
+    var pass        = prefs.getString(PREFIX_KEY_PASS, null)
     val matchDevice = prefs.getString(PREFIX_KEY_MATCH, null)
     val onCritical  = prefs.getString(PREFIX_KEY_ON_CRITICAL, null)
     val onError     = prefs.getString(PREFIX_KEY_ON_ERROR, null)
@@ -46,10 +48,14 @@ object ZendroidPreferences {
     val invalidSSL  = prefs.getString(PREFIX_KEY_INVALID_SSL, null)
     val updateEvery = prefs.getString(PREFIX_KEY_UPDATE_EVERY, null)
 
+    try {
+      pass = SimpleCrypto.decrypt(ENCRYPT_KEY, pass)
+    }catch {
+      case e => pass = null
+    }
 
     if(url == null || user == null || pass == null || updateEvery == null) 
       return None
-
 
     return Some(Map("url" -> url, "user" -> user, "pass" -> pass, "update" -> updateEvery, "match" -> matchDevice, "on_critical" -> onCritical, "on_error"->onError, "on_warning"->onWarning, "invalid_ssl"->invalidSSL))
   }

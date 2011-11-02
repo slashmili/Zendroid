@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/mnuLastStatus"
+        android:title="Last Status" />
+    <item android:id="@+id/mnuRemoveAccount"
+        android:title="Remove Account" />
+    <item android:id="@+id/mnuAbout"
+        android:title="About" />
+</menu>

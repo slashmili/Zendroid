@@ -3,8 +3,8 @@ package com.github.slashmili.Zendroid
 
 import _root_.android.app.Activity
 import _root_.android.os.Bundle
-import _root_.android.view.View
-import _root_.android.widget.{EditText, TextView, Button, Spinner, ArrayAdapter, AdapterView}
+import _root_.android.view.{View, Menu, MenuItem}
+import _root_.android.widget.{EditText, TextView, Button, Spinner, ArrayAdapter, AdapterView, Toast}
 import _root_.android.content.Intent;
 import _root_.android.widget.AdapterView.OnItemSelectedListener
 import _root_.android.appwidget.AppWidgetManager
@@ -56,6 +56,31 @@ class GlobalConfiguration extends Activity  {
   var finishedSavingProcess = false 
   var errorMessage = ""
 
+  override def onCreateOptionsMenu(menu: Menu): Boolean ={
+    val inflater = getMenuInflater()
+    inflater.inflate(R.menu.config_menu, menu)
+    return true
+  }
+
+  override def onOptionsItemSelected(item: MenuItem): Boolean ={
+    item.getItemId match {
+      case R.id.mnuLastStatus    => openLastStatusPopup
+      case R.id.mnuRemoveAccount => {
+        txtZenossURL.setText("")
+        txtZenossUser.setText("")
+        txtZenossPass.setText("")
+        updateEvery = UpdatePeriod.DISABLED
+        saveSettings
+        runAndExit
+      }
+      case R.id.mnuAbout         => {
+        val about = new Intent(GlobalConfiguration.this, classOf[MainActivity])
+        startActivity(about)
+      }
+    }
+    return super.onOptionsItemSelected(item)
+  }
+
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
 
@@ -86,7 +111,7 @@ class GlobalConfiguration extends Activity  {
 
         def onNothingSelected(parrent: AdapterView[_]) = {
         }
-      })
+    })
 
     //config spnOnError
     spnOnError = findViewById(R.id.spnOnError).asInstanceOf[Spinner]
@@ -149,7 +174,8 @@ class GlobalConfiguration extends Activity  {
       val user = txtZenossUser.getText().toString()
       val pass = txtZenossPass.getText().toString()
       if (updateEvery == 0){
-        saveSettings()
+        saveSettings
+        runAndExit
       }
       else {
         new CheckSettings().execute(url, user, pass)
@@ -159,26 +185,29 @@ class GlobalConfiguration extends Activity  {
 
   val btnGetLastStatusOnClickListener = new View.OnClickListener() {
     def onClick(v: View): Unit = {
-      val lastRunStatus = if (ServiceRunner.started == false){
-        "Last Run Error: You haven't run Zendroid service yet"
-      }
-      else if (ServiceRunner.errorMessage == "" ){
-        "Last Run Error: Clean"
-      }else {
-        "Last Run Error: "  + ServiceRunner.errorMessage
-      }
-      new AlertDialog.Builder(GlobalConfiguration.this)
-      .setTitle("Last Status")
-      .setMessage("Next Update: " + ServiceRunner.nextTime.format("%R") + "\n" + lastRunStatus)
-      .setNegativeButton("Close", new DialogInterface.OnClickListener() {
-          def onClick(dialog: DialogInterface, which:Int) ={
-            dialog.cancel
-          }
-        })
-      .show()
+      openLastStatusPopup
     }
   }
 
+  def openLastStatusPopup() = {
+    val lastRunStatus = if (ServiceRunner.started == false){
+      "Last Run Error: You haven't run Zendroid service yet"
+    }
+    else if (ServiceRunner.errorMessage == "" ){
+      "Last Run Error: Clean"
+    }else {
+      "Last Run Error: "  + ServiceRunner.errorMessage
+    }
+    new AlertDialog.Builder(GlobalConfiguration.this)
+    .setTitle("Last Status")
+    .setMessage("Next Update: " + ServiceRunner.nextTime.format("%R") + "\n" + lastRunStatus)
+    .setNegativeButton("Close", new DialogInterface.OnClickListener() {
+        def onClick(dialog: DialogInterface, which:Int) ={
+          dialog.cancel
+        }
+      })
+    .show()
+  }
 
   def showPopupError (error:String) = {
     new AlertDialog.Builder(GlobalConfiguration.this)
@@ -193,12 +222,25 @@ class GlobalConfiguration extends Activity  {
   }
 
   def saveSettings() = {
-    val url = txtZenossURL.getText().toString()
+      val url = txtZenossURL.getText().toString()
       val user = txtZenossUser.getText().toString()
       val pass = txtZenossPass.getText().toString()
       val matchDevice = txtMatchDevice.getText().toString()
       ZendroidPreferences.savePref(GlobalConfiguration.this, url, user, pass, onCritical, onError, onWarning, matchDevice, 0, updateEvery)
+  }
+
+  def runAndExit () ={
       ServiceRunner.startService(this);
+
+      val toastMessage = if(updateEvery==0){
+        "Stops monitoring"
+      }else{
+        "Starts monitoring ..."
+      }
+      val context = getApplicationContext()
+      val toast = Toast.makeText(context, toastMessage , Toast.LENGTH_SHORT)
+      toast.show()
+      finish()
   }
 
   def loadSettings() = {
@@ -257,7 +299,8 @@ class GlobalConfiguration extends Activity  {
       if(saveSettingsCheck == false){
         showPopupError(errorMessage)
       }else {
-        saveSettings()
+        saveSettings
+        runAndExit
       }
     }
   }

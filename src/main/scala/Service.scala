@@ -132,9 +132,10 @@ object ServiceRunner {
         remoteView.setOnClickPendingIntent(R.id.severity3, pendingIntentGlobalConfiguration)
       }
 
+      Log.d("ServiceRunner.updateWidget", "severity5: " + events.get("severity5") + " | severity4: " + events.get("severity4") +  " | severity3: " + events.get("severity3"))
       errorText = ServiceRunner.errorMessage
       if(errorText != ""){
-        remoteView.setTextViewText(R.id.widgetError, "I got an error for last run for more info go to zendroid and check 'Last Status'")
+        remoteView.setTextViewText(R.id.widgetError, ServiceRunner.errorMessage + "\n" + ServiceRunner.nextTime.format("%R"))
       }
       else {
         remoteView.setTextViewText(R.id.widgetError, "")
@@ -193,7 +194,7 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
       return Some(Map("severity5" -> "0", "severity4" -> "0", "severity3" -> "0"))
     }
     if(zp.get("update").toString.toInt == 0){
-      ServiceRunner.errorMessage = "Service Disabled"
+      ServiceRunner.errorMessage = "Service is disabled"
       return None
     }
 
@@ -262,6 +263,7 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
         ServiceRunner.criticalEvent = severity5
         ServiceRunner.errorEvent = severity4
         ServiceRunner.warninigEvent = severity3
+        Log.d("ZenossUpdateService.getLastEvent", "severity5: " + severity5.toString + " | severity4: " + severity4.toString + " | severity3: " + severity3.toString)
         return Some(Map("severity5" -> severity5.toString, "severity4" -> severity4.toString, "severity3" -> severity3.toString))
       }
 
@@ -275,7 +277,7 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
       ServiceRunner.nextTime.set(System.currentTimeMillis() + updateEvery)
       val nextUpdate = ServiceRunner.nextTime.toMillis(false)
       ServiceRunner.alarmManager.set(AlarmManager.RTC_WAKEUP, nextUpdate, pendingIntent)
-      Log.d("UpdateService", " will be called Later (" + ServiceRunner.nextTime.format("%R") + ")")
+      Log.d("ZenossUpdateService.getLastEvent", " will be called Later (" + ServiceRunner.nextTime.format("%R") + ")")
     }
     return None
   }
