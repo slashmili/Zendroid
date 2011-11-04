@@ -17,9 +17,9 @@ import org.apache.http.client.params.ClientPNames;
 
 import _root_.android.util.Log
 
-class ZenossAPI (url: String, username: String, password: String){
+class ZenossAPI (url: String, username: String, password: String, acceptUntrustedSSL:Boolean = false){
   var cookie = ""
-
+  def isAcceptUntrustedSSL = acceptUntrustedSSL
   def auth : Boolean = {
     val addrLogin="/zport/acl_users/cookieAuthHelper/login"
     val data = List(("__ac_name", username),
@@ -29,7 +29,7 @@ class ZenossAPI (url: String, username: String, password: String){
               )
 
     Log.w("ZenossAPI", "I'm going to submit user info to web page")
-    val res = HttpClient.Post("%s%s" format(url,addrLogin), data, List())
+    val res = HttpClient.Post("%s%s" format(url,addrLogin), data, List(), acceptUntrustedSSL)
     if (res != None)
       res.get._2 filter {
         h=> h._1.toUpperCase == "Set-Cookie".toUpperCase
@@ -47,7 +47,7 @@ class ZenossAPI (url: String, username: String, password: String){
 
 
     Log.w("ZenossAPI", "Ok then, I'm submiting test page wait...")
-    val res = HttpClient.Post("%s%s".format(url,"/zport/dmd"), List(), List(("Cookie", cookie)))
+    val res = HttpClient.Post("%s%s".format(url,"/zport/dmd"), List(), List(("Cookie", cookie)), acceptUntrustedSSL)
     if (res == None)
       return false
     Log.w("ZenossAPI", "It returns something let's check it")
@@ -66,17 +66,17 @@ class ZenossAPI (url: String, username: String, password: String){
 }
 
 object ZenossEvents {
-  implicit def MapEvents(zen: ZenossAPI) = new ZenossEvents(zen.getUrl, zen.getCookie)
+  implicit def MapEvents(zen: ZenossAPI) = new ZenossEvents(zen.getUrl, zen.getCookie, zen.isAcceptUntrustedSSL)
 }
 
-class ZenossEvents (url: String, cookie: String) {
+class ZenossEvents (url: String, cookie: String, acceptUntrustedSSL:Boolean = false) {
   val action = "EventsRouter"
   val actionType   = "rpc"
 
   def eventsQuery : Option[JSONObject] = {
     val u = "/zport/dmd/evconsole_router"
     val l = """{"action":"EventsRouter","method":"query","data":[{"start":0,"limit":100,"dir":"DESC","sort":"severity","params":"{\"severity\":[5,4,3],\"eventState\":[0,1]}"}],"type":"rpc","tid":1}"""
-    val res = HttpClient.Json("%s%s".format(url, u), new JSONObject(l), List(("Cookie", cookie)))
+    val res = HttpClient.Json("%s%s".format(url, u), new JSONObject(l), List(("Cookie", cookie)), acceptUntrustedSSL)
     Log.d("ZenossEvents -------------> ", res.toString)
     if(res == None)
       return None
@@ -92,33 +92,38 @@ object HttpClient {
 
   private def urlEncode(str: String) =  URLEncoder.encode(str, charset)
 
-  def Json(url: String, data: JSONObject,  headers: List[(String, String)]): Option[(JSONObject, List[(String, String)])] = {
+  def Json(url: String, data: JSONObject,  headers: List[(String, String)], acceptUntrustedSSL:Boolean = false): Option[(JSONObject, List[(String, String)])] = {
     val postHeader = ("Content-type", "application/json") :: ("Accept", "application/json") :: headers 
-    val req = Request(url, data.toString, postHeader)
+    val req = Request(url, data.toString, postHeader, acceptUntrustedSSL)
 
     if (req != None )
       return Some(( new JSONObject(req.get._1), req.get._2 ))
     return None
   }
 
-  def Post(url: String, data: List[(String, String)], headers: List[(String, String)]): Option[(String, List[(String, String)])] = {
+  def Post(url: String, data: List[(String, String)], headers: List[(String, String)], acceptUntrustedSSL:Boolean = false): Option[(String, List[(String, String)])] = {
     val postHeader = ("Content-type","application/x-www-form-urlencoded") :: headers
     var raw_data = ""
     raw_data = data.foldLeft(raw_data) { (raw_data, x) => raw_data +  x._1 + "=" + x._2 + "&" }
-    Request(url, raw_data, postHeader)
+    Request(url, raw_data, postHeader, acceptUntrustedSSL)
   }
 
-  def Get(url: String, data: List[(String, String)], headers: List[(String, String)]): Option[(String, List[(String, String)])] = {
+  def Get(url: String, data: List[(String, String)], headers: List[(String, String)], acceptUntrustedSSL:Boolean = false): Option[(String, List[(String, String)])] = {
     var raw_data = ""
     raw_data = data.foldLeft(raw_data) { (raw_data, x) => raw_data +  urlEncode(x._1) + "=" + urlEncode(x._2) + "&" }
 
-    Request("%s?%s".format(url, raw_data), "", headers)
+    Request("%s?%s".format(url, raw_data), "", headers, acceptUntrustedSSL)
   }
 
-  def Request(url: String, data: String, headers: List[(String, String)]): Option[(String, List[(String, String)])] = {
+  def Request(url: String, data: String, headers: List[(String, String)], acceptUntrustedSSL:Boolean = false): Option[(String, List[(String, String)])] = {
     try 
     {
-      val httpclient = new DefaultHttpClient()
+      val httpclient = if (acceptUntrustedSSL == false){
+        new DefaultHttpClient()
+      }else {
+        Log.d("HttpClient", "asked me to accpet untrusted SSL connection")
+        UntrustedHttpsClient.createHttpClient
+      }
       Log.w("HttpClient", "I'm removing http redirect handler ")
       httpclient.getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false)
       val httpPostRequest = new HttpPost(url)

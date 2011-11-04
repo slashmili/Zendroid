@@ -214,8 +214,14 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
       val user = zp.get("user").toString
       val pass = zp.get("pass").toString
 
+      val invalidSSL = if (zp.get("invalid_ssl").toString == "0"){
+          false
+        } else {
+          true
+      }
+
       Log.w("Widgets", "Login to Zenoss")
-      val zen = new ZenossAPI(url, user, pass)
+      val zen = new ZenossAPI(url, user, pass, invalidSSL)
       if(zen.auth == false)
         return None
       val jOpt = zen.eventsQuery

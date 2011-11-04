@@ -4,7 +4,7 @@ package com.github.slashmili.Zendroid
 import _root_.android.app.Activity
 import _root_.android.os.Bundle
 import _root_.android.view.{View, Menu, MenuItem}
-import _root_.android.widget.{EditText, TextView, Button, Spinner, ArrayAdapter, AdapterView, Toast}
+import _root_.android.widget.{EditText, TextView, Button, Spinner, ArrayAdapter, AdapterView, Toast, CheckBox}
 import _root_.android.content.Intent;
 import _root_.android.widget.AdapterView.OnItemSelectedListener
 import _root_.android.appwidget.AppWidgetManager
@@ -46,6 +46,7 @@ class GlobalConfiguration extends Activity  {
   var spnOnWarning:Spinner = _
   var spnUpdateEvery:Spinner = _
   var txtMatchDevice:EditText = _
+  var chkInvalidSSL:CheckBox = _
 
   //variables
   var updateEvery: Int = UpdatePeriod.EVERY_5_MINS
@@ -93,6 +94,7 @@ class GlobalConfiguration extends Activity  {
     txtZenossUser  =  findViewById(R.id.txtZenossUser).asInstanceOf[EditText]
     txtZenossPass  =  findViewById(R.id.txtZenossPass).asInstanceOf[EditText]
     txtMatchDevice =  findViewById(R.id.txtMatchDevice).asInstanceOf[EditText]
+    chkInvalidSSL  =  findViewById(R.id.chkInvalidSSL).asInstanceOf[CheckBox]
 
     val eventAdapter = ArrayAdapter.createFromResource(this, R.array.on_event_choice, android.R.layout.simple_spinner_item);
     eventAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);    
@@ -178,7 +180,11 @@ class GlobalConfiguration extends Activity  {
         runAndExit
       }
       else {
-        new CheckSettings().execute(url, user, pass)
+        var acceptInvalidSSL = "0"
+        if(chkInvalidSSL.isChecked == true){
+            acceptInvalidSSL = "1"
+        }
+        new CheckSettings().execute(url, user, pass, acceptInvalidSSL)
       }
     }
   }
@@ -226,7 +232,12 @@ class GlobalConfiguration extends Activity  {
       val user = txtZenossUser.getText().toString()
       val pass = txtZenossPass.getText().toString()
       val matchDevice = txtMatchDevice.getText().toString()
-      ZendroidPreferences.savePref(GlobalConfiguration.this, url, user, pass, onCritical, onError, onWarning, matchDevice, 0, updateEvery)
+      val invalidSSL = if ( chkInvalidSSL.isChecked){
+        1
+      } else {
+        0
+      }
+      ZendroidPreferences.savePref(GlobalConfiguration.this, url, user, pass, onCritical, onError, onWarning, matchDevice, invalidSSL, updateEvery)
   }
 
   def runAndExit () ={
@@ -253,6 +264,10 @@ class GlobalConfiguration extends Activity  {
       spnOnCritical.setSelection(config.get("on_critical").toString.toInt)
       spnOnError.setSelection(config.get("on_error").toString.toInt)
       spnOnWarning.setSelection(config.get("on_warning").toString.toInt)
+      var invalidSSL = false
+      if ( config.get("invalid_ssl").toString.toInt == 1)
+        invalidSSL = true
+      chkInvalidSSL.setChecked(invalidSSL)
 
       val updateEvery = config.get("update").toString.toInt
       updateEvery match {
@@ -269,7 +284,10 @@ class GlobalConfiguration extends Activity  {
   private class CheckSettings extends MyAsyncTask {
     var dialog:ProgressDialog = _ 
     override protected def doInBackground1(zenConf: Array[String]): String = {
-      val zen = new ZenossAPI(zenConf(0), zenConf(1), zenConf(2))
+      var acceptInvalidSSL = false
+      if (zenConf(3).toString.toInt == 1)
+        acceptInvalidSSL = true
+      val zen = new ZenossAPI(zenConf(0), zenConf(1), zenConf(2), acceptInvalidSSL)
       saveSettingsCheck = false
       errorMessage = ""
       try {
