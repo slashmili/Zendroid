@@ -34,23 +34,24 @@ public final class R {
         public static final int zendroid_icon=0x7f02000f;
     }
     public static final class id {
-        public static final int WidgetBox=0x7f080022;
-        public static final int WidgetErrorBox=0x7f08002c;
-        public static final int btnSaveSettings=0x7f08001d;
+        public static final int WidgetBox=0x7f080024;
+        public static final int WidgetErrorBox=0x7f08002e;
+        public static final int btnSaveSettings=0x7f080020;
+        public static final int chkInvalidSSL=0x7f08001e;
         public static final int editText4=0x7f08000c;
-        public static final int mnuAbout=0x7f080030;
-        public static final int mnuLastStatus=0x7f08002e;
-        public static final int mnuRemoveAccount=0x7f08002f;
-        public static final int ok=0x7f080020;
-        public static final int severity3=0x7f08002b;
-        public static final int severity3Box=0x7f080029;
-        public static final int severity3Img=0x7f08002a;
-        public static final int severity4=0x7f080028;
-        public static final int severity4Box=0x7f080026;
-        public static final int severity4Img=0x7f080027;
-        public static final int severity5=0x7f080025;
-        public static final int severity5Box=0x7f080023;
-        public static final int severity5Img=0x7f080024;
+        public static final int mnuAbout=0x7f080032;
+        public static final int mnuLastStatus=0x7f080030;
+        public static final int mnuRemoveAccount=0x7f080031;
+        public static final int ok=0x7f080022;
+        public static final int severity3=0x7f08002d;
+        public static final int severity3Box=0x7f08002b;
+        public static final int severity3Img=0x7f08002c;
+        public static final int severity4=0x7f08002a;
+        public static final int severity4Box=0x7f080028;
+        public static final int severity4Img=0x7f080029;
+        public static final int severity5=0x7f080027;
+        public static final int severity5Box=0x7f080025;
+        public static final int severity5Img=0x7f080026;
         public static final int spnOnCritical=0x7f08000f;
         public static final int spnOnError=0x7f080012;
         public static final int spnOnWarning=0x7f080015;
@@ -58,8 +59,8 @@ public final class R {
         public static final int tableLayout1=0x7f080000;
         public static final int tableRow1=0x7f080001;
         public static final int tableRow10=0x7f080019;
-        public static final int tableRow11=0x7f08001c;
-        public static final int tableRow12=0x7f08001e;
+        public static final int tableRow11=0x7f08001f;
+        public static final int tableRow12=0x7f08001c;
         public static final int tableRow2=0x7f080004;
         public static final int tableRow3=0x7f080007;
         public static final int tableRow4=0x7f08000a;
@@ -68,7 +69,8 @@ public final class R {
         public static final int tableRow8=0x7f080013;
         public static final int tableRow9=0x7f080016;
         public static final int textView1=0x7f080002;
-        public static final int textView10=0x7f08001f;
+        public static final int textView10=0x7f080021;
+        public static final int textView11=0x7f08001d;
         public static final int textView2=0x7f080005;
         public static final int textView3=0x7f080008;
         public static final int textView4=0x7f08000b;
@@ -81,8 +83,8 @@ public final class R {
         public static final int txtZenossPass=0x7f080009;
         public static final int txtZenossURL=0x7f080003;
         public static final int txtZenossUser=0x7f080006;
-        public static final int widgetError=0x7f08002d;
-        public static final int widgetHolder=0x7f080021;
+        public static final int widgetError=0x7f08002f;
+        public static final int widgetHolder=0x7f080023;
     }
     public static final class layout {
         public static final int global_configuration=0x7f030000;
