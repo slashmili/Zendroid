@@ -15,11 +15,18 @@ import org.apache.http.impl.client.DefaultHttpClient
 import org.json.JSONObject
 import org.apache.http.client.params.ClientPNames;
 
-import _root_.android.util.Log
+import _root_.android.util.{Log => AndroidLog}
+
+private object Log {
+  def d(b:String) ={
+    AndroidLog.d("ZenossAPI", b)
+  }
+}
 
 class ZenossAPI (url: String, username: String, password: String, acceptUntrustedSSL:Boolean = false){
   var cookie = ""
   def isAcceptUntrustedSSL = acceptUntrustedSSL
+
   def auth : Boolean = {
     val addrLogin="/zport/acl_users/cookieAuthHelper/login"
     val data = List(("__ac_name", username),
@@ -28,7 +35,7 @@ class ZenossAPI (url: String, username: String, password: String, acceptUntruste
                     ("came_from", "%s%s".format(url, "/zport/dmd"))
               )
 
-    Log.w("ZenossAPI", "I'm going to submit user info to web page")
+    Log.d("ZenossAPI.auth: I'm going to submit user info to web page")
     val res = HttpClient.Post("%s%s" format(url,addrLogin), data, List(), acceptUntrustedSSL)
     if (res != None)
       res.get._2 filter {
@@ -37,7 +44,7 @@ class ZenossAPI (url: String, username: String, password: String, acceptUntruste
         case(hName, hValue) => cookie = hValue
       }
 
-    Log.w("ZenossAPI", "I submit username and password let's check it")
+    Log.d("ZenossAPI.auth: I submit username and password let's check it")
     return authCheck
   }
 
@@ -46,11 +53,11 @@ class ZenossAPI (url: String, username: String, password: String, acceptUntruste
       return false
 
 
-    Log.w("ZenossAPI", "Ok then, I'm submiting test page wait...")
+    Log.d("ZenossAPI.authCheck: Ok then, I'm submiting test page wait...")
     val res = HttpClient.Post("%s%s".format(url,"/zport/dmd"), List(), List(("Cookie", cookie)), acceptUntrustedSSL)
     if (res == None)
       return false
-    Log.w("ZenossAPI", "It returns something let's check it")
+    Log.d("ZenossAPI.authCheck: It returns something let's check it")
     val resCode = res.get._2 filter {
       h => h._1 == "StatusCode" && h._2 == "200"
     }
@@ -77,7 +84,7 @@ class ZenossEvents (url: String, cookie: String, acceptUntrustedSSL:Boolean = fa
     val u = "/zport/dmd/evconsole_router"
     val l = """{"action":"EventsRouter","method":"query","data":[{"start":0,"limit":100,"dir":"DESC","sort":"severity","params":"{\"severity\":[5,4,3],\"eventState\":[0,1]}"}],"type":"rpc","tid":1}"""
     val res = HttpClient.Json("%s%s".format(url, u), new JSONObject(l), List(("Cookie", cookie)), acceptUntrustedSSL)
-    Log.d("ZenossEvents -------------> ", res.toString)
+    Log.d(res.toString)
     if(res == None)
       return None
     return Some(res.get._1)
@@ -121,10 +128,10 @@ object HttpClient {
       val httpclient = if (acceptUntrustedSSL == false){
         new DefaultHttpClient()
       }else {
-        Log.d("HttpClient", "asked me to accpet untrusted SSL connection")
+        Log.d("asked me to accpet untrusted SSL connection")
         UntrustedHttpsClient.createHttpClient
       }
-      Log.w("HttpClient", "I'm removing http redirect handler ")
+      Log.d("HttpClient.Request: I'm removing http redirect handler ")
       httpclient.getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false)
       val httpPostRequest = new HttpPost(url)
       val se = new StringEntity(data)
@@ -135,15 +142,15 @@ object HttpClient {
       }
       httpPostRequest.setHeader("Accept-Encoding", "gzip")
 
-      Log.w("HttpClient", "Executing Request")
+      Log.d("HttpClient.Request: Executing Request")
       //TODO: set timeout
       val response = httpclient.execute(httpPostRequest).asInstanceOf[HttpResponse]
-      Log.w("HttpClient", "I've got some hot data from remote server")
+      Log.d("HttpClient.Request: I've got some hot data from remote server")
 
       //Get headers
       var resHeader: List[(String,String)] = List()
 
-      Log.w("HttpClient", "I'm getting headers")
+      Log.d("HttpClient.Request: I'm getting headers")
       response.getAllHeaders foreach { 
         case(header) =>  
         resHeader ::= (header.getName.toString , header.getValue.toString) 
@@ -151,12 +158,11 @@ object HttpClient {
       resHeader ::= ("StatusCode", response.getStatusLine().getStatusCode().toString)
 
       //Get body
-      Log.w("HttpClient", "I'm reading body")
+      Log.d("HttpClient.Request: I'm reading body")
       val entity = response.getEntity()
       var instream = entity.getContent()
-      //TODO: fixme : NULLpointer error try with google.com
       if (response.containsHeader("Content-Encoding") == true && response.getFirstHeader("Content-Encoding").getValue == "gzip"){
-        Log.w("HttpClient", "Opps! it's ziped, no worry I have my tools to decode it")
+        Log.d("HttpClient.Request: Opps! it's ziped, no worry I have my tools to decode it")
         instream = new GZIPInputStream(instream)
       }
       val reader = new BufferedReader(new InputStreamReader(instream))

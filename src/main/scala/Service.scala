@@ -21,6 +21,7 @@ import com.github.slashmili.Zendroid.{R, GlobalConfiguration, ZendroidPreference
 object ServiceRunner { 
   var alarmManager:AlarmManager = _
   var service:ZenossUpdateService = _
+  var lastThrowableError:java.lang.Throwable = _
   var criticalEvent = 0
   var errorEvent    = 0 
   var warninigEvent = 0
@@ -59,89 +60,80 @@ object ServiceRunner {
       def getLastEvent() : Option[Map[String, String]] = {
         return Some(Map("severity5" -> ServiceRunner.criticalEvent.toString, "severity4" -> ServiceRunner.errorEvent.toString, "severity3" -> ServiceRunner.warninigEvent.toString))
       }
-      val zp = ZendroidPreferences.loadPref(context)
-      if (zp == None){
-        val errorRemoteView = new RemoteViews(context.getPackageName(),R.layout.small_widget_error)
-        errorRemoteView.setTextViewText(R.id.widgetError,"Loading ...")
-        return errorRemoteView
-      }
-      var errorText = ""
-      var events: Option[Map[String, String]] = None
       try {
+        val zp = ZendroidPreferences.loadPref(context)
+        if (zp == None){
+          val errorRemoteView = new RemoteViews(context.getPackageName(),R.layout.small_widget_error)
+          errorRemoteView.setTextViewText(R.id.widgetError,"Loading ...")
+          return errorRemoteView
+        }
+        var errorText = ""
+        var events: Option[Map[String, String]] = None
         events = getLastEvent()
-      }catch {
-        case e :javax.net.ssl.SSLException => {
-          errorText="Your domain doesn't have valid ssl"
+        val remoteView = new RemoteViews(context.getPackageName(),R.layout.small_widget )
+
+        val intentGlobalConfiguration = new Intent(context, classOf[GlobalConfiguration])
+        val pendingIntentGlobalConfiguration = PendingIntent.getActivity(context, 0, intentGlobalConfiguration, 0)
+        if(events != None)
+        {
+          if(events.get("severity5") == "0"){
+            remoteView.setInt(R.id.severity5Img, "setAlpha", 100);
+            remoteView.setInt(R.id.severity5Box, "setBackgroundResource", R.drawable.severity5_background_noevent);
+          }else {
+            remoteView.setInt(R.id.severity5Img, "setAlpha", 255);
+            remoteView.setInt(R.id.severity5Box, "setBackgroundResource", R.drawable.severity5_background);
+          }
+          remoteView.setTextViewText(R.id.severity5, events.get("severity5"))
+          remoteView.setOnClickPendingIntent(R.id.severity5, pendingIntentGlobalConfiguration)
+
+          if(events.get("severity4") == "0"){
+              remoteView.setInt(R.id.severity4Img, "setAlpha", 100);
+              remoteView.setInt(R.id.severity4Box, "setBackgroundResource", R.drawable.severity4_background_noevent);
+          }else {
+              remoteView.setInt(R.id.severity4Img, "setAlpha", 255);
+              remoteView.setInt(R.id.severity4Box, "setBackgroundResource", R.drawable.severity4_background);
+          }
+          remoteView.setTextViewText(R.id.severity4, events.get("severity4"))
+          remoteView.setOnClickPendingIntent(R.id.severity4, pendingIntentGlobalConfiguration)
+
+          if(events.get("severity3") == "0"){
+            remoteView.setInt(R.id.severity3Img, "setAlpha", 100);
+            remoteView.setInt(R.id.severity3Box, "setBackgroundResource", R.drawable.severity3_background_noevent);
+          }else {
+            remoteView.setInt(R.id.severity3Img, "setAlpha", 255);
+            remoteView.setInt(R.id.severity3Box, "setBackgroundResource", R.drawable.severity3_background);
+          }
+          remoteView.setTextViewText(R.id.severity3, events.get("severity3"))
+          remoteView.setOnClickPendingIntent(R.id.severity3, pendingIntentGlobalConfiguration)
         }
-        case e:java.net.UnknownHostException => {
-          errorText="Can't find host " + zp.get("url")
+
+        Log.d("ServiceRunner.updateWidget", "severity5: " + events.get("severity5") + " | severity4: " + events.get("severity4") +  " | severity3: " + events.get("severity3"))
+        Log.d("ServiceRunner.updateWidget", "Error : " + ServiceRunner.errorMessage)
+
+        errorText = ServiceRunner.errorMessage
+        if(errorText != ""){
+          
+          val msg = if(zp.get("update").toString.toInt == 0){
+            "    Zendroid is disabled    "
+          }else {
+            var now  = new Time()
+            now.set(System.currentTimeMillis())
+            "   Couldn't fetch data at " + now.format("%R") + "   "
+          }
+          remoteView.setTextViewText(R.id.widgetError, msg)
         }
-        case e:org.apache.http.conn.HttpHostConnectException => {
-          errorText="Conenction to " + zp.get("url") + " refused"
+        else {
+          remoteView.setTextViewText(R.id.widgetError, "")
         }
-        case e: org.apache.http.conn.ConnectTimeoutException => {
-          Log.d(TAG, "It seems internet connection goes down, or server doesn't response")
-        }
-        case e: java.net.NoRouteToHostException => {
-          Log.d(TAG, "It seems internet connection goes down")
-        }
-        case e: java.io.IOException => {
-          Log.d(TAG, "IOException ! try again later")
-        }
-        case e: java.net.SocketException => {
-          Log.d(TAG, "IOException ! try again later")
-        }
+        remoteView.setOnClickPendingIntent(R.id.widgetError, pendingIntentGlobalConfiguration)
+        remoteView
+      } catch {
+        //save error for debug
         case e => {
-          errorText="Unkown Error " + e.toString
+          ServiceRunner.lastThrowableError = e
+          throw e
         }
       }
-      val remoteView = new RemoteViews(context.getPackageName(),R.layout.small_widget )
-
-      val intentGlobalConfiguration = new Intent(context, classOf[GlobalConfiguration])
-      val pendingIntentGlobalConfiguration = PendingIntent.getActivity(context, 0, intentGlobalConfiguration, 0)
-      if(events != None)
-      {
-        if(events.get("severity5") == "0"){
-          remoteView.setInt(R.id.severity5Img, "setAlpha", 100);
-          remoteView.setInt(R.id.severity5Box, "setBackgroundResource", R.drawable.severity5_background_noevent);
-        }else {
-          remoteView.setInt(R.id.severity5Img, "setAlpha", 255);
-          remoteView.setInt(R.id.severity5Box, "setBackgroundResource", R.drawable.severity5_background);
-        }
-        remoteView.setTextViewText(R.id.severity5, events.get("severity5"))
-        remoteView.setOnClickPendingIntent(R.id.severity5, pendingIntentGlobalConfiguration)
-
-        if(events.get("severity4") == "0"){
-            remoteView.setInt(R.id.severity4Img, "setAlpha", 100);
-            remoteView.setInt(R.id.severity4Box, "setBackgroundResource", R.drawable.severity4_background_noevent);
-        }else {
-            remoteView.setInt(R.id.severity4Img, "setAlpha", 255);
-            remoteView.setInt(R.id.severity4Box, "setBackgroundResource", R.drawable.severity4_background);
-        }
-        remoteView.setTextViewText(R.id.severity4, events.get("severity4"))
-        remoteView.setOnClickPendingIntent(R.id.severity4, pendingIntentGlobalConfiguration)
-
-        if(events.get("severity3") == "0"){
-          remoteView.setInt(R.id.severity3Img, "setAlpha", 100);
-          remoteView.setInt(R.id.severity3Box, "setBackgroundResource", R.drawable.severity3_background_noevent);
-        }else {
-          remoteView.setInt(R.id.severity3Img, "setAlpha", 255);
-          remoteView.setInt(R.id.severity3Box, "setBackgroundResource", R.drawable.severity3_background);
-        }
-        remoteView.setTextViewText(R.id.severity3, events.get("severity3"))
-        remoteView.setOnClickPendingIntent(R.id.severity3, pendingIntentGlobalConfiguration)
-      }
-
-      Log.d("ServiceRunner.updateWidget", "severity5: " + events.get("severity5") + " | severity4: " + events.get("severity4") +  " | severity3: " + events.get("severity3"))
-      errorText = ServiceRunner.errorMessage
-      if(errorText != ""){
-        remoteView.setTextViewText(R.id.widgetError, ServiceRunner.errorMessage + "\n" + ServiceRunner.nextTime.format("%R"))
-      }
-      else {
-        remoteView.setTextViewText(R.id.widgetError, "")
-      }
-      remoteView.setOnClickPendingIntent(R.id.widgetError, pendingIntentGlobalConfiguration)
-      remoteView
     }
   }
 
@@ -170,7 +162,10 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
       ServiceRunner.errorMessage = ""
       requestLastEvent(this)
     }catch {
-      case e => ServiceRunner.errorMessage = e.toString
+      case e => {
+        ServiceRunner.errorMessage = e.toString
+        ServiceRunner.lastThrowableError = e
+      }
     }
 
     //update other widgets
@@ -194,7 +189,7 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
       return Some(Map("severity5" -> "0", "severity4" -> "0", "severity3" -> "0"))
     }
     if(zp.get("update").toString.toInt == 0){
-      ServiceRunner.errorMessage = "Service is disabled"
+      ServiceRunner.errorMessage = "Zendroid is disabled"
       return None
     }
 
@@ -203,7 +198,7 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
     updateIntent.setClass(this, classOf[ZenossUpdateService])
     val pendingIntent = PendingIntent.getService(this, 0, updateIntent, 0);
     if(ServiceRunner.alarmManager != Nil){
-      try {
+    try {
         ServiceRunner.alarmManager.cancel(pendingIntent)
       }catch {
         case e => Log.d("Service", "Tried to cancel alaram but faild, " + e.toString)
@@ -278,7 +273,7 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
     }finally {
       //set new alarm
       ServiceRunner.alarmManager = getSystemService(Context.ALARM_SERVICE).asInstanceOf[AlarmManager]
-      ServiceRunner.nextTime = new Time();
+      ServiceRunner.nextTime = new Time()
       val updateEvery = zp.get("update").toString.toInt
       ServiceRunner.nextTime.set(System.currentTimeMillis() + updateEvery)
       val nextUpdate = ServiceRunner.nextTime.toMillis(false)
@@ -299,17 +294,18 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
       }
       if (notificationState != 0){
         if (!ServiceRunner.EventStore.contains(eventId)){
-          val ns = Context.NOTIFICATION_SERVICE;
-          val nm = getSystemService(ns).asInstanceOf[NotificationManager]
+          var now  = new Time()
+          now.set(System.currentTimeMillis())
+          val ns   = Context.NOTIFICATION_SERVICE;
+          val nm   = getSystemService(ns).asInstanceOf[NotificationManager]
           val host = "Zendroid: " + hostname
-          val sum  = hostname + ": " + summary
-          var icon = 0
-          if (severity == 3)
-            icon  = R.drawable.severity3_notify
-          if (severity  == 4)
-            icon   = R.drawable.severity4_notify
-          if (severity == 5)
-            icon   = R.drawable.severity5_notify
+          val sum  = "(@" + now.format("%R")   + ") " + summary
+          var icon = severity match {
+            case 3 => R.drawable.severity3_notify
+            case 4 => R.drawable.severity4_notify
+            case 5 => R.drawable.severity5_notify
+            case _ => 0
+          }
 
           val notification = new Notification(icon, sum, System.currentTimeMillis());
           val contentIntent = PendingIntent.getActivity(this, 0,

@@ -87,7 +87,6 @@ class GlobalConfiguration extends Activity  {
 
     setContentView(R.layout.global_configuration)
     findViewById(R.id.btnSaveSettings).setOnClickListener(btnSaveSettingsOnClickListener)
-    findViewById(R.id.btnGetLastStatus).setOnClickListener(btnGetLastStatusOnClickListener)
 
     //config texts
     txtZenossURL   =  findViewById(R.id.txtZenossURL).asInstanceOf[EditText]
@@ -189,27 +188,43 @@ class GlobalConfiguration extends Activity  {
     }
   }
 
-  val btnGetLastStatusOnClickListener = new View.OnClickListener() {
-    def onClick(v: View): Unit = {
-      openLastStatusPopup
-    }
-  }
-
   def openLastStatusPopup() = {
-    val lastRunStatus = if (ServiceRunner.started == false){
-      "Last Run Error: You haven't run Zendroid service yet"
+    var lastRunStatus = if (ServiceRunner.started == false){
+      "You haven't run Zendroid service yet"
     }
     else if (ServiceRunner.errorMessage == "" ){
-      "Last Run Error: Clean"
+      "Clean"
     }else {
-      "Last Run Error: "  + ServiceRunner.errorMessage
+      ServiceRunner.lastThrowableError.getMessage
     }
+    lastRunStatus = "Last Error: " + lastRunStatus
     new AlertDialog.Builder(GlobalConfiguration.this)
     .setTitle("Last Status")
     .setMessage("Next Update: " + ServiceRunner.nextTime.format("%R") + "\n" + lastRunStatus)
     .setNegativeButton("Close", new DialogInterface.OnClickListener() {
         def onClick(dialog: DialogInterface, which:Int) ={
           dialog.cancel
+        }
+      })
+    .setPositiveButton("Send debug info !", new DialogInterface.OnClickListener() {
+        def onClick(dialog: DialogInterface, which:Int)= {
+           if (ServiceRunner.lastThrowableError != null ){
+             var stackTrace = "Exception : " + ServiceRunner.lastThrowableError.toString + "\n"
+             for (e <- ServiceRunner.lastThrowableError.getStackTrace){ 
+               stackTrace = stackTrace + e.toString + "\n" 
+             }
+             val emailIntent = new Intent(Intent.ACTION_SEND)
+             emailIntent.setType("plain/text")
+             emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, Array("miliroid@gmail.com"))
+             emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Zendroid Stack Error")
+             emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, stackTrace )
+             startActivity(Intent.createChooser(emailIntent, "Report Last Exception"))
+           }else {
+              val toastMessage = "There isn't any debug to send"
+              val context = getApplicationContext()
+              val toast = Toast.makeText(context, toastMessage , Toast.LENGTH_SHORT)
+              toast.show()
+          }
         }
       })
     .show()
@@ -244,9 +259,9 @@ class GlobalConfiguration extends Activity  {
       ServiceRunner.startService(this);
 
       val toastMessage = if(updateEvery==0){
-        "Stops monitoring"
+        "Stoping monitoring ..."
       }else{
-        "Starts monitoring ..."
+        "Starting monitoring ..."
       }
       val context = getApplicationContext()
       val toast = Toast.makeText(context, toastMessage , Toast.LENGTH_SHORT)
@@ -290,6 +305,16 @@ class GlobalConfiguration extends Activity  {
       val zen = new ZenossAPI(zenConf(0), zenConf(1), zenConf(2), acceptInvalidSSL)
       saveSettingsCheck = false
       errorMessage = ""
+      try {
+        val tmp = txtMatchDevice.getText.toString.r.findAllIn("").toSeq.length
+        saveSettingsCheck = true
+      }catch {
+        case _ => {
+          errorMessage = "Invalid Regex in Match Device"
+          saveSettingsCheck = false
+          return "checked"
+        }
+      }
       try {
         if(zen.auth == false){
           errorMessage = "Wrong username or password"
