@@ -6,7 +6,7 @@ import _root_.android.util.Log
 import _root_.android.text.format.Time
 import _root_.android.appwidget.AppWidgetManager
 import _root_.android.widget.RemoteViews
-
+import _root_.android.os.Build
 import _root_.org.json.JSONObject
 import _root_.org.apache.http.conn.HttpHostConnectException
 import _root_.org.apache.http.conn.ConnectTimeoutException
@@ -61,50 +61,55 @@ object ServiceRunner {
         return Some(Map("severity5" -> ServiceRunner.criticalEvent.toString, "severity4" -> ServiceRunner.errorEvent.toString, "severity3" -> ServiceRunner.warninigEvent.toString))
       }
       try {
+        val intentGlobalConfiguration = new Intent(context, classOf[GlobalConfiguration])
+        val pendingIntentGlobalConfiguration = PendingIntent.getActivity(context, 0, intentGlobalConfiguration, 0)
+
         val zp = ZendroidPreferences.loadPref(context)
         if (zp == None){
           val errorRemoteView = new RemoteViews(context.getPackageName(),R.layout.small_widget_error)
-          errorRemoteView.setTextViewText(R.id.widgetError,"Loading ...")
+          errorRemoteView.setTextViewText(R.id.widgetError,"Click here to configure Zenoss connection")
+          errorRemoteView.setOnClickPendingIntent(R.id.widgetError, pendingIntentGlobalConfiguration)
+
           return errorRemoteView
         }
         var errorText = ""
         var events: Option[Map[String, String]] = None
         events = getLastEvent()
         val remoteView = new RemoteViews(context.getPackageName(),R.layout.small_widget )
-
-        val intentGlobalConfiguration = new Intent(context, classOf[GlobalConfiguration])
-        val pendingIntentGlobalConfiguration = PendingIntent.getActivity(context, 0, intentGlobalConfiguration, 0)
         if(events != None)
         {
           if(events.get("severity5") == "0"){
-            remoteView.setInt(R.id.severity5Img, "setAlpha", 100);
+            remoteView.setInt(R.id.severity5Img, "setAlpha", 100)
             remoteView.setInt(R.id.severity5Box, "setBackgroundResource", R.drawable.severity5_background_noevent);
           }else {
-            remoteView.setInt(R.id.severity5Img, "setAlpha", 255);
+            remoteView.setInt(R.id.severity5Img, "setAlpha", 255)
             remoteView.setInt(R.id.severity5Box, "setBackgroundResource", R.drawable.severity5_background);
           }
           remoteView.setTextViewText(R.id.severity5, events.get("severity5"))
           remoteView.setOnClickPendingIntent(R.id.severity5, pendingIntentGlobalConfiguration)
+          remoteView.setOnClickPendingIntent(R.id.severity5Box, pendingIntentGlobalConfiguration)
 
           if(events.get("severity4") == "0"){
-              remoteView.setInt(R.id.severity4Img, "setAlpha", 100);
-              remoteView.setInt(R.id.severity4Box, "setBackgroundResource", R.drawable.severity4_background_noevent);
+            remoteView.setInt(R.id.severity4Img, "setAlpha", 100)
+            remoteView.setInt(R.id.severity4Box, "setBackgroundResource", R.drawable.severity4_background_noevent);
           }else {
-              remoteView.setInt(R.id.severity4Img, "setAlpha", 255);
-              remoteView.setInt(R.id.severity4Box, "setBackgroundResource", R.drawable.severity4_background);
+            remoteView.setInt(R.id.severity4Img, "setAlpha", 255)
+            remoteView.setInt(R.id.severity4Box, "setBackgroundResource", R.drawable.severity4_background);
           }
           remoteView.setTextViewText(R.id.severity4, events.get("severity4"))
           remoteView.setOnClickPendingIntent(R.id.severity4, pendingIntentGlobalConfiguration)
+          remoteView.setOnClickPendingIntent(R.id.severity4Box, pendingIntentGlobalConfiguration)
 
           if(events.get("severity3") == "0"){
-            remoteView.setInt(R.id.severity3Img, "setAlpha", 100);
+            remoteView.setInt(R.id.severity3Img, "setAlpha", 100)
             remoteView.setInt(R.id.severity3Box, "setBackgroundResource", R.drawable.severity3_background_noevent);
           }else {
-            remoteView.setInt(R.id.severity3Img, "setAlpha", 255);
+            remoteView.setInt(R.id.severity3Img, "setAlpha", 255)
             remoteView.setInt(R.id.severity3Box, "setBackgroundResource", R.drawable.severity3_background);
           }
           remoteView.setTextViewText(R.id.severity3, events.get("severity3"))
           remoteView.setOnClickPendingIntent(R.id.severity3, pendingIntentGlobalConfiguration)
+          remoteView.setOnClickPendingIntent(R.id.severity3Box, pendingIntentGlobalConfiguration)
         }
 
         Log.d("ServiceRunner.updateWidget", "severity5: " + events.get("severity5") + " | severity4: " + events.get("severity4") +  " | severity3: " + events.get("severity3"))
@@ -299,7 +304,7 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
           val ns   = Context.NOTIFICATION_SERVICE;
           val nm   = getSystemService(ns).asInstanceOf[NotificationManager]
           val host = "Zendroid: " + hostname
-          val sum  = "(@" + now.format("%R")   + ") " + summary
+          val sum  = "(@" + now.format("%R")   + ") " + summary.trim
           var icon = severity match {
             case 3 => R.drawable.severity3_notify
             case 4 => R.drawable.severity4_notify

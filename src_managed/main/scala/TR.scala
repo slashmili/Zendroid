@@ -4,6 +4,7 @@ import android.view.View
 
 case class TypedResource[T](id: Int)
 object TR {
+  val textView11 = TypedResource[android.widget.TextView](R.id.textView11)
   val severity3Box = TypedResource[android.widget.LinearLayout](R.id.severity3Box)
   val severity3 = TypedResource[android.widget.TextView](R.id.severity3)
   val txtZenossURL = TypedResource[android.widget.EditText](R.id.txtZenossURL)
@@ -28,6 +29,7 @@ object TR {
   val spnUpdateEvery = TypedResource[android.widget.Spinner](R.id.spnUpdateEvery)
   val spnOnCritical = TypedResource[android.widget.Spinner](R.id.spnOnCritical)
   val severity3Img = TypedResource[android.widget.ImageView](R.id.severity3Img)
+  val chkInvalidSSL = TypedResource[android.widget.CheckBox](R.id.chkInvalidSSL)
   val tableRow9 = TypedResource[android.widget.TableRow](R.id.tableRow9)
   val editText4 = TypedResource[android.widget.EditText](R.id.editText4)
   val textView9 = TypedResource[android.widget.TextView](R.id.textView9)
