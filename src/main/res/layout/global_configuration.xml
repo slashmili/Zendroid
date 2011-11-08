@@ -101,7 +101,7 @@
 
         <TableRow android:id="@+id/tableRow11" android:layout_width="wrap_content" android:layout_height="wrap_content">
               <Button 
-              	android:text="Save Settings and Reload Service" 
+              	android:text="Save settings and reload service" 
               	android:id="@+id/btnSaveSettings" 
               	android:layout_width="fill_parent" 
               	android:layout_height="wrap_content" 
@@ -113,18 +113,18 @@
        
        </TableRow>
        <TableRow android:id="@+id/tableRow12" android:layout_width="wrap_content" android:layout_height="wrap_content">
-           <TextView 
-               android:layout_width="wrap_content" 
-               android:id="@+id/textView10" 
-               android:text="Press Menu for more options" 
-               android:layout_height="wrap_content" 
-               android:layout_gravity="center_vertical"
-               android:singleLine="true"
-               android:layout_span="2"
-               android:layout_weight="1"
-               >
-           </TextView>
+              <Button 
+              	android:text="Delete Account and stop service" 
+              	android:id="@+id/btnDeleteAccount" 
+              	android:layout_width="fill_parent" 
+              	android:layout_height="wrap_content" 
+              	android:singleLine="true"
+                android:layout_span="2"
+                android:layout_weight="1"
+                >
+                </Button>
        </TableRow>
+
 
     </TableLayout>
 </LinearLayout>

@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:weightSum="1">
+
+    <TableLayout
+           android:paddingLeft="40px"
+           android:stretchColumns="1"
+        android:id="@+id/tableLayout1" android:layout_weight="0.37" android:layout_height="wrap_content" android:layout_width="fill_parent">
+       <TableRow android:id="@+id/tableRow1" android:layout_height="wrap_content" android:layout_width="fill_parent">
+
+        <ImageView 
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content" 
+            android:src="@drawable/server_linux" 
+            android:id="@+id/listViewErrorIcon">
+        </ImageView>
+      
+   
+       <LinearLayout 
+           android:id="@+id/linearLayout1" android:orientation="vertical" android:layout_height="wrap_content" android:layout_width="fill_parent">
+    
+            <TextView 
+                android:text="servername" 
+                android:id="@+id/listViewServerName" 
+                android:layout_width="fill_parent" 
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+            ></TextView>
+            
+            
+            
+            <LinearLayout 	 android:layout_gravity="right"
+                android:layout_width="150px"
+                android:layout_height="27px"
+                android:orientation="horizontal"
+                android:id="@+id/listViewErrorBOX"
+            >
+            
+                <LinearLayout 	 android:layout_gravity="center"
+                    android:layout_width="50px"
+                    android:layout_height="27px"
+                    android:orientation="horizontal"
+                    android:id="@+id/listViewerrorBOXSeverity5"
+                    android:background="#d60000"
+                >
+                    <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+                        android:layout_width="24px"
+                        android:layout_height="24px"
+                        android:id="@+id/listViewSeverity5Img"
+                        android:src="@drawable/severity5"
+                        android:paddingTop="3px"
+                        android:paddingLeft="5px"
+                        android:paddingRight="5px"
+                    />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/listViewseverity5"
+                        android:layout_gravity="center"
+                        android:textSize="10sp"
+                        android:gravity="center"
+                        android:paddingLeft="3px"
+                        android:textColor="#FFFFFF"
+                        android:paddingTop="1dip"
+                        android:text="00">
+                    </TextView>	    
+                </LinearLayout>
+                 
+                 
+                <LinearLayout 	 android:layout_gravity="center"
+                    android:layout_width="50px"
+                    android:layout_height="27px"
+                    android:orientation="horizontal"
+                    android:id="@+id/listViewerrorBOXSeverity4"
+                    android:background="#ff9711"
+                >
+                    <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+                        android:layout_width="24px"
+                        android:layout_height="24px"
+                        android:id="@+id/listViewSeverity4Img"
+                        android:src="@drawable/severity4"
+                        android:paddingTop="3px"
+                        android:paddingLeft="5px"
+                        android:paddingRight="5px"
+                    />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/listViewseverity4"
+                        android:layout_gravity="center"
+                        android:textSize="10sp"
+                        android:gravity="center"
+                        android:paddingLeft="3px"
+                        android:textColor="#FFFFFF"
+                        android:paddingTop="1dip"
+                        android:text="00">
+                    </TextView>	    
+                </LinearLayout>         
+                 
+                 
+                 
+                 
+                 
+                 
+                 
+                 
+                <LinearLayout 	 android:layout_gravity="center"
+                    android:layout_width="50px"
+                    android:layout_height="27px"
+                    android:orientation="horizontal"
+                    android:id="@+id/listViewerrorBOXSeverity3"
+                    android:background="#FBD13D"
+                >
+                    <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+                        android:layout_width="24px"
+                        android:layout_height="24px"
+                        android:id="@+id/listViewSeverity3Img"
+                        android:src="@drawable/severity3"
+                        android:paddingTop="3px"
+                        android:paddingLeft="5px"
+                        android:paddingRight="5px"
+                    />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/listViewseverity3"
+                        android:layout_gravity="center"
+                        android:textSize="10sp"
+                        android:gravity="center"
+                        android:paddingLeft="3px"
+                        android:textColor="#FFFFFF"
+                        android:paddingTop="1dip"
+                        android:text="00">
+                    </TextView>	    
+                </LinearLayout>               
+            </LinearLayout>
+        </LinearLayout>
+       </TableRow>
+    </TableLayout>
+</LinearLayout>

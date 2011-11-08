@@ -16,7 +16,8 @@ import _root_.java.io.IOException
 
 import com.github.slashmili.Zendroid.utils._
 import ZenossEvents._
-import com.github.slashmili.Zendroid.{R, GlobalConfiguration, ZendroidPreferences}
+import com.github.slashmili.Zendroid.{R, GlobalConfiguration, ZendroidPreferences, EventConsoleActivity}
+import Store._
 
 object ServiceRunner { 
   var alarmManager:AlarmManager = _
@@ -61,7 +62,7 @@ object ServiceRunner {
         return Some(Map("severity5" -> ServiceRunner.criticalEvent.toString, "severity4" -> ServiceRunner.errorEvent.toString, "severity3" -> ServiceRunner.warninigEvent.toString))
       }
       try {
-        val intentGlobalConfiguration = new Intent(context, classOf[GlobalConfiguration])
+        val intentGlobalConfiguration = new Intent(context, classOf[EventConsoleActivity])
         val pendingIntentGlobalConfiguration = PendingIntent.getActivity(context, 0, intentGlobalConfiguration, 0)
 
         val zp = ZendroidPreferences.loadPref(context)
@@ -144,7 +145,7 @@ object ServiceRunner {
 
   object EventStore {
     var eventIDs:List[String] = List()
-      def append(evid: String) = {
+    def append(evid: String) = {
         eventIDs ::=evid
     }
 
@@ -154,6 +155,24 @@ object ServiceRunner {
       else
         return false
     }
+
+
+
+    var devices: Map[String, ZenossDevice] = Map()
+    def getDevices = devices
+    def cleanDevices = { devices = Map() }
+    def appendEvent(uid: String, name: String, evid: String, summary: String, severity: Int, count: Int, eventState: String, firstTime: String, lastTime: String, component: String) = {
+      val zd: ZenossDevice= devices.get(uid).orElse(Some(new ZenossDevice(uid, name))).get
+      zd.addEvent(evid, summary, severity, count, eventState, firstTime, lastTime, component)
+      devices += (uid -> zd)
+    }
+
+    def countCritical              = devices.foldLeft(0)(_ + _._2.countCritical)
+    def countCritical(uid: String) = devices.get(uid).get.countCritical
+    def countError                 = devices.foldLeft(0)(_ + _._2.countError)
+    def countError(uid: String)    = devices.get(uid).get.countError
+    def countWarning               = devices.foldLeft(0)(_ + _._2.countWarning)
+    def countWarning(uid: String)  = devices.get(uid).get.countWarning
   }
 }
 
@@ -234,13 +253,23 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
       val match_d = zp.get("match").toString
       if(jEvent.has("result") && jEvent.getJSONObject("result").has("events")){
         val events = jEvent.getJSONObject("result").getJSONArray("events")
+        ServiceRunner.EventStore.cleanDevices
         for(i <- 0 to  events.length -1 ){
           val JO = new JSONObject( events.get(i).toString)
             //TODO make a method for this shits
+
+          val uid        = JO.getJSONObject("device").getString("uid")
+          val hostname   = JO.getJSONObject("device").getString("text").trim
+          val errorText  = JO.getString("summary")
+          val eventId    = JO.getString("evid")
+          val countError = JO.getString("count").toInt
+          val severity   = JO.getString("severity").toInt
+          val eventState = JO.getString("eventState")
+          val firstTime  = JO.getString("firstTime")
+          val lastTime   = JO.getString("lastTime")
+          val component  = JO.getJSONObject("component").getString("text")
+
           if(JO.has("device") && JO.getJSONObject("device").has("text")){
-            val hostname   = JO.getJSONObject("device").getString("text").trim
-            val errorText  = JO.getString("summary")
-            val eventId    = JO.getString("evid")
             if(match_d == "") {
               if(JO.has("severity")){
                 JO.getString("severity") match {
@@ -249,6 +278,7 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
                   case "3" => severity3 += 1 ; showNotification(eventId, hostname,errorText, 3);
                 }
               }
+              ServiceRunner.EventStore.appendEvent(uid, hostname, eventId, errorText, severity, countError, eventState, firstTime, lastTime, component)
             }else {
               match_d.split(",").foreach {
                 case str => {
@@ -314,12 +344,12 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
 
           val notification = new Notification(icon, sum, System.currentTimeMillis());
           val contentIntent = PendingIntent.getActivity(this, 0,
-          new Intent(this, classOf[ZenossUpdateService]), 0)
+          new Intent(this, classOf[EventConsoleActivity]), 0)
           notification.setLatestEventInfo(this, host, sum, contentIntent);
           //if set to make sound
           if(notificationState == 2)
             notification.defaults |= Notification.DEFAULT_SOUND
-          nm.notify(eventId, severity, notification);
+          nm.notify(eventId, 0, notification);
           ServiceRunner.EventStore.append(eventId)
         }
       }

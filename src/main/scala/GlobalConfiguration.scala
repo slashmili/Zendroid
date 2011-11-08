@@ -57,37 +57,12 @@ class GlobalConfiguration extends Activity  {
   var finishedSavingProcess = false 
   var errorMessage = ""
 
-  override def onCreateOptionsMenu(menu: Menu): Boolean ={
-    val inflater = getMenuInflater()
-    inflater.inflate(R.menu.config_menu, menu)
-    return true
-  }
-
-  override def onOptionsItemSelected(item: MenuItem): Boolean ={
-    item.getItemId match {
-      case R.id.mnuLastStatus    => openLastStatusPopup
-      case R.id.mnuRemoveAccount => {
-        txtZenossURL.setText("")
-        txtZenossUser.setText("")
-        txtZenossPass.setText("")
-        updateEvery = UpdatePeriod.DISABLED
-        saveSettings
-        runAndExit
-      }
-      case R.id.mnuAbout         => {
-        val about = new Intent(GlobalConfiguration.this, classOf[MainActivity])
-        startActivity(about)
-      }
-    }
-    return super.onOptionsItemSelected(item)
-  }
-
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
 
     setContentView(R.layout.global_configuration)
     findViewById(R.id.btnSaveSettings).setOnClickListener(btnSaveSettingsOnClickListener)
-
+    findViewById(R.id.btnDeleteAccount).setOnClickListener(btnRemoveAccountOnClickListener)
     //config texts
     txtZenossURL   =  findViewById(R.id.txtZenossURL).asInstanceOf[EditText]
     txtZenossUser  =  findViewById(R.id.txtZenossUser).asInstanceOf[EditText]
@@ -188,46 +163,30 @@ class GlobalConfiguration extends Activity  {
     }
   }
 
-  def openLastStatusPopup() = {
-    var lastRunStatus = if (ServiceRunner.started == false){
-      "You haven't run Zendroid service yet"
-    }
-    else if (ServiceRunner.errorMessage == "" ){
-      "Clean"
-    }else {
-      ServiceRunner.lastThrowableError.getMessage
-    }
-    lastRunStatus = "Last Error: " + lastRunStatus
+
+  val btnRemoveAccountOnClickListener = new View.OnClickListener() {
+    def onClick(v: View): Unit = {
     new AlertDialog.Builder(GlobalConfiguration.this)
-    .setTitle("Last Status")
-    .setMessage("Next Update: " + ServiceRunner.nextTime.format("%R") + "\n" + lastRunStatus)
-    .setNegativeButton("Close", new DialogInterface.OnClickListener() {
+    .setTitle("Removing Account")
+    .setMessage("Do you want remove your account from Zendroid? ")
+    .setNegativeButton("No", new DialogInterface.OnClickListener() {
         def onClick(dialog: DialogInterface, which:Int) ={
           dialog.cancel
         }
       })
-    .setPositiveButton("Send debug info !", new DialogInterface.OnClickListener() {
-        def onClick(dialog: DialogInterface, which:Int)= {
-           if (ServiceRunner.lastThrowableError != null ){
-             var stackTrace = "Exception : " + ServiceRunner.lastThrowableError.toString + "\n"
-             for (e <- ServiceRunner.lastThrowableError.getStackTrace){ 
-               stackTrace = stackTrace + e.toString + "\n" 
-             }
-             val emailIntent = new Intent(Intent.ACTION_SEND)
-             emailIntent.setType("plain/text")
-             emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, Array("miliroid@gmail.com"))
-             emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Zendroid Stack Error")
-             emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, stackTrace )
-             startActivity(Intent.createChooser(emailIntent, "Report Last Exception"))
-           }else {
-              val toastMessage = "There isn't any debug to send"
-              val context = getApplicationContext()
-              val toast = Toast.makeText(context, toastMessage , Toast.LENGTH_SHORT)
-              toast.show()
-          }
+    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+        def onClick(dialog: DialogInterface, which:Int) ={
+          txtZenossURL.setText("")
+          txtZenossUser.setText("")
+          txtZenossPass.setText("")
+          updateEvery = UpdatePeriod.DISABLED
+          saveSettings
+          runAndExit
+          dialog.cancel
         }
       })
     .show()
+    }
   }
 
   def showPopupError (error:String) = {
