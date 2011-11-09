@@ -31,9 +31,10 @@ class GlobalConfiguration extends Activity  {
   }
 
   object Alarm {
-    val NO_ALARM=0;
-    val ALARM_WITH_NOTIFICATION=1;
-    val ALARM_WITH_NOTIFICATION_AND_SOUND=2;
+    val NO_ALARM=0
+    val ALARM_WITH_NOTIFICATION=1
+    val ALARM_WITH_NOTIFICATION_AND_SOUND=2
+    val ALARM_WITH_NOTIFICATION_AND_SOUND_AND_VIBRATE=3
   }
 
 
@@ -70,6 +71,14 @@ class GlobalConfiguration extends Activity  {
     txtMatchDevice =  findViewById(R.id.txtMatchDevice).asInstanceOf[EditText]
     chkInvalidSSL  =  findViewById(R.id.chkInvalidSSL).asInstanceOf[CheckBox]
 
+    def getAlaramType(id: Int) ={
+      id match {
+          case 1 => Alarm.ALARM_WITH_NOTIFICATION
+          case 2 => Alarm.ALARM_WITH_NOTIFICATION_AND_SOUND
+          case 3 => Alarm.ALARM_WITH_NOTIFICATION_AND_SOUND_AND_VIBRATE
+          case _ => Alarm.NO_ALARM
+      }
+    }
     val eventAdapter = ArrayAdapter.createFromResource(this, R.array.on_event_choice, android.R.layout.simple_spinner_item);
     eventAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);    
     //config spnOnCritical
@@ -78,11 +87,7 @@ class GlobalConfiguration extends Activity  {
     //TODO: make class for handling Alarm Spinner
     spnOnCritical.setOnItemSelectedListener(new OnItemSelectedListener() {
         def onItemSelected (parrent: AdapterView[_], v: View, position: Int, id:Long) ={
-          onCritical = position match  {
-            case 0 => Alarm.NO_ALARM
-            case 1 => Alarm.ALARM_WITH_NOTIFICATION
-            case 2 => Alarm.ALARM_WITH_NOTIFICATION_AND_SOUND
-          }
+          onCritical = getAlaramType(position)
         }
 
         def onNothingSelected(parrent: AdapterView[_]) = {
@@ -94,11 +99,7 @@ class GlobalConfiguration extends Activity  {
     spnOnError.setAdapter(eventAdapter);
     spnOnError.setOnItemSelectedListener(new OnItemSelectedListener() {
         def onItemSelected (parrent: AdapterView[_], v: View, position: Int, id:Long) ={
-          onError = position match  {
-            case 0 => Alarm.NO_ALARM
-            case 1 => Alarm.ALARM_WITH_NOTIFICATION
-            case 2 => Alarm.ALARM_WITH_NOTIFICATION_AND_SOUND
-          }
+          onError = getAlaramType(position)
         }
 
         def onNothingSelected(parrent: AdapterView[_]) = {
@@ -110,11 +111,7 @@ class GlobalConfiguration extends Activity  {
     spnOnWarning.setAdapter(eventAdapter);
     spnOnWarning.setOnItemSelectedListener(new OnItemSelectedListener() {
         def onItemSelected (parrent: AdapterView[_], v: View, position: Int, id:Long) ={
-          onWarning = position match  {
-            case 0 => Alarm.NO_ALARM
-            case 1 => Alarm.ALARM_WITH_NOTIFICATION
-            case 2 => Alarm.ALARM_WITH_NOTIFICATION_AND_SOUND
-          }
+          onWarning = getAlaramType(position)
         }
 
         def onNothingSelected(parrent: AdapterView[_]) = {
@@ -149,7 +146,12 @@ class GlobalConfiguration extends Activity  {
       val url = txtZenossURL.getText().toString()
       val user = txtZenossUser.getText().toString()
       val pass = txtZenossPass.getText().toString()
+      val config = ZendroidPreferences.loadPref(GlobalConfiguration.this)
       if (updateEvery == 0){
+        saveSettings
+        runAndExit
+      }
+      else if(config != None && config.get("url").toString == url && config.get("user") == user && config.get("pass") == pass){
         saveSettings
         runAndExit
       }
@@ -168,7 +170,7 @@ class GlobalConfiguration extends Activity  {
     def onClick(v: View): Unit = {
     new AlertDialog.Builder(GlobalConfiguration.this)
     .setTitle("Removing Account")
-    .setMessage("Do you want remove your account from Zendroid? ")
+    .setMessage("Do you want to remove your account from Zenroid ?")
     .setNegativeButton("No", new DialogInterface.OnClickListener() {
         def onClick(dialog: DialogInterface, which:Int) ={
           dialog.cancel

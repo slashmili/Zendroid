@@ -79,23 +79,34 @@ class CustomDeviceErrorListView (context: Context) extends BaseExpandableListAda
     }
     val tv = cv.findViewById(R.id.listViewServerName).asInstanceOf[TextView]
     tv.setText(d.getName)
+
     val c = d.countCritical
     val tc = cv.findViewById(R.id.listViewseverity5).asInstanceOf[TextView]
     tc.setText(c.toString)
-    if(c == 0){
-      val l = cv.findViewById(R.id.listViewerrorBOXSeverity5).asInstanceOf[View]
-      //l.setAlpha
-    }
+    val lc = cv.findViewById(R.id.listViewerrorBOXSeverity5).asInstanceOf[View]
+    if(c == 0)
+      lc.getBackground().setAlpha(100)
+    else
+      lc.getBackground().setAlpha(255)
+
     val e = d.countError
     val te = cv.findViewById(R.id.listViewseverity4).asInstanceOf[TextView]
     te.setText(e.toString)
-    if( e == 0){
-    }
+    val le = cv.findViewById(R.id.listViewerrorBOXSeverity4).asInstanceOf[View]
+    if( e == 0)
+      le.getBackground().setAlpha(100)
+    else
+      le.getBackground().setAlpha(255)
+
     val w = d.countWarning
     val tw = cv.findViewById(R.id.listViewseverity3).asInstanceOf[TextView]
     tw.setText(w.toString)
-    if(w == 0){
-    }
+    val lw = cv.findViewById(R.id.listViewerrorBOXSeverity3).asInstanceOf[View]
+    if(w == 0)
+      lw.getBackground().setAlpha(100)
+    else
+      lw.getBackground().setAlpha(255)
+
     val di = cv.findViewById(R.id.listViewErrorIcon).asInstanceOf[ImageView]
     val icon = d.getDeviceType match {
       case "linux"   => R.drawable.server_linux

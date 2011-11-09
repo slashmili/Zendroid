@@ -1,15 +1,17 @@
 <manifest 
 android:versionName="2.0" android:versionCode="2" package="com.github.slashmili.Zendroid" xmlns:android="http://schemas.android.com/apk/res/android">
- <uses-permission  android:name="android.permission.INTERNET" />
+    <uses-permission  android:name="android.permission.INTERNET" />
+    <uses-permission  android:name="android.permission.VIBRATE" />
+    <uses-permission  android:name="android.permission.FLASHLIGHT" />
     <uses-sdk android:minSdkVersion="8"></uses-sdk>
-    <application android:icon="@drawable/zendroid_icon" android:label="@string/app_name">
-        <activity android:label="Event Console" android:name=".EventConsoleActivity">
+    <application android:icon="@drawable/zendroid_icon" android:label="Zenroid">
+        <activity android:label="Zenroid" android:name=".EventConsoleActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.LAUNCHER"></category>
             </intent-filter>
         </activity>
-        <activity android:label="About Zendroid" android:name=".MainActivity" />
+        <activity android:label="About Zenroid" android:name=".MainActivity" />
         <activity android:label="Configuration" android:name=".GlobalConfiguration" />
         <receiver android:name="SmallWidget">
             <intent-filter>

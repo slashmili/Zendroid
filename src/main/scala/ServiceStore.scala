@@ -30,7 +30,7 @@ class ZenossDevice(uid: String, name: String){
         return "server"
     }else if(uid.contains("Router")){
         return "router"
-    }else if(uid.contains("Network")){
+    }else if(uid.contains("Switch")){
         return "network"
     }
     return "unknown"

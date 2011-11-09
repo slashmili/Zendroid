@@ -29,6 +29,7 @@ object ServiceRunner {
   var errorMessage = ""
   var started      = false
   var nextTime = new Time()
+  val lastTime = new Time()
   val TAG = "Zendroid.Services.ServiceRunner"
 
   def startService (context: Context) = {
@@ -120,7 +121,7 @@ object ServiceRunner {
         if(errorText != ""){
           
           val msg = if(zp.get("update").toString.toInt == 0){
-            "    Zendroid is disabled    "
+            "    Zenroid is disabled    "
           }else {
             var now  = new Time()
             now.set(System.currentTimeMillis())
@@ -213,7 +214,7 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
       return Some(Map("severity5" -> "0", "severity4" -> "0", "severity3" -> "0"))
     }
     if(zp.get("update").toString.toInt == 0){
-      ServiceRunner.errorMessage = "Zendroid is disabled"
+      ServiceRunner.errorMessage = "Zenroid is disabled"
       return None
     }
 
@@ -289,6 +290,7 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
                         case "4" => severity4 += 1; showNotification(eventId, hostname,errorText, 4);
                         case "3" => severity3 += 1; showNotification(eventId, hostname,errorText, 3);
                       }
+                      ServiceRunner.EventStore.appendEvent(uid, hostname, eventId, errorText, severity, countError, eventState, firstTime, lastTime, component)
                     }
                   }
                 }
@@ -300,6 +302,7 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
         ServiceRunner.errorEvent = severity4
         ServiceRunner.warninigEvent = severity3
         Log.d("ZenossUpdateService.getLastEvent", "severity5: " + severity5.toString + " | severity4: " + severity4.toString + " | severity3: " + severity3.toString)
+        ServiceRunner.lastTime.set(System.currentTimeMillis())
         return Some(Map("severity5" -> severity5.toString, "severity4" -> severity4.toString, "severity3" -> severity3.toString))
       }
 
@@ -333,7 +336,7 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
           now.set(System.currentTimeMillis())
           val ns   = Context.NOTIFICATION_SERVICE;
           val nm   = getSystemService(ns).asInstanceOf[NotificationManager]
-          val host = "Zendroid: " + hostname
+          val host = "Zenroid: " + hostname
           val sum  = "(@" + now.format("%R")   + ") " + summary.trim
           var icon = severity match {
             case 3 => R.drawable.severity3_notify
@@ -347,8 +350,12 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
           new Intent(this, classOf[EventConsoleActivity]), 0)
           notification.setLatestEventInfo(this, host, sum, contentIntent);
           //if set to make sound
-          if(notificationState == 2)
+          if(notificationState == 2 || notificationState == 3)
             notification.defaults |= Notification.DEFAULT_SOUND
+          if(notificationState == 3){
+            notification.defaults |= Notification.DEFAULT_VIBRATE
+            notification.defaults |= Notification.DEFAULT_LIGHTS
+          }
           nm.notify(eventId, 0, notification);
           ServiceRunner.EventStore.append(eventId)
         }

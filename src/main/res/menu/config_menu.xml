@@ -5,7 +5,7 @@
     <item android:id="@+id/mnuRefresh"
         android:title="Refresh" />
     <item android:id="@+id/mnuAccount"
-        android:title="Zenoss Setting" />
+        android:title="Settings" />
     <item android:id="@+id/mnuAbout"
         android:title="About" />
 </menu>
