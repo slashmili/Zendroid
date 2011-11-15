@@ -1,12 +1,13 @@
 package com.github.slashmili.Zendroid.utils
 
-import java.util.ArrayList
+import android.app.Dialog
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseExpandableListAdapter
 import android.widget.{TextView, ImageView, LinearLayout}
+import _root_.android.util.{Log => aLog}
 
 import com.github.slashmili.Zendroid.Services.Store
 import com.github.slashmili.Zendroid.R
@@ -22,7 +23,7 @@ class CustomDeviceErrorListView (context: Context) extends BaseExpandableListAda
   }
 
   override def getChild(groupPosition: Int, childPosition: Int) = {
-    devices(childPosition)
+    devices(groupPosition).getEvent(childPosition)
   }
 
   override def getChildId(groupPosition: Int, childPosition: Int): Long = {
@@ -44,10 +45,7 @@ class CustomDeviceErrorListView (context: Context) extends BaseExpandableListAda
       case 5 => R.drawable.severity5_notify
       case _ => 0
     }
-    /*
-    val ie = cv.findViewById(Ri.id.EventErrorCustomListViewIcon)asInstanceOf[ImageView]
-    ie.setImageResource(icon)
-    */
+
     tv.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
     tv.setCompoundDrawablesWithIntrinsicBounds(icon, 0, 0, 0);
 
@@ -121,7 +119,7 @@ class CustomDeviceErrorListView (context: Context) extends BaseExpandableListAda
   }
 
   override def hasStableIds = true
-  override def isChildSelectable(arg0: Int, arg1: Int) = false
+  override def isChildSelectable(arg0: Int, arg1: Int) = true
 }
 
 

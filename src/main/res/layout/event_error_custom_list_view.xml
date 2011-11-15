@@ -1,15 +1,11 @@
 <LinearLayout android:id="@+id/LinearLayout01"
-        android:layout_width="fill_parent" android:layout_height="45dip"
-        xmlns:android="http://schemas.android.com/apk/res/android">
-        <!--
-        <ImageView 
-            android:layout_width="wrap_content" 
-            android:layout_height="wrap_content" 
-            android:id="@+id/EventErrorCustomListViewIcon">
-        </ImageView>
-        -->
-        <TextView android:layout_width="fill_parent"
-                android:layout_height="45dip" android:paddingLeft="5dip"
+        android:layout_height="45dip"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent">
+        <TextView
+                android:layout_height="45dip"
+                android:layout_width="fill_parent"
+                android:paddingLeft="5dip"
                 android:paddingRight="5dip" 
                 android:gravity="center_vertical" android:id="@+id/tvChild"
                 android:text="Children"></TextView>

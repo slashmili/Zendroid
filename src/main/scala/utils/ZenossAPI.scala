@@ -79,16 +79,41 @@ object ZenossEvents {
 class ZenossEvents (url: String, cookie: String, acceptUntrustedSSL:Boolean = false) {
   val action = "EventsRouter"
   val actionType   = "rpc"
-
+  val addrEventConsole = "/zport/dmd/evconsole_router"
   def eventsQuery : Option[JSONObject] = {
-    val u = "/zport/dmd/evconsole_router"
     val l = """{"action":"EventsRouter","method":"query","data":[{"start":0,"limit":100,"dir":"DESC","sort":"severity","params":"{\"severity\":[5,4,3],\"eventState\":[0,1]}"}],"type":"rpc","tid":1}"""
-    val res = HttpClient.Json("%s%s".format(url, u), new JSONObject(l), List(("Cookie", cookie)), acceptUntrustedSSL)
+    val res = HttpClient.Json("%s%s".format(url, addrEventConsole), new JSONObject(l), List(("Cookie", cookie)), acceptUntrustedSSL)
     Log.d(res.toString)
     if(res == None)
       return None
     return Some(res.get._1)
  
+  }
+
+
+  def eventsAcknowledge(evid: String): Boolean = {
+    /*
+    TODO: handle error
+    {"tid": 2, "action": "EventsRouter", "type": "rpc", "method": "acknowledge", "result": {"success": true}}
+    {"message": "Unauthorized Calling acknowledge requires \\"Manage Events\\" permission.", "type": "exception"}',
+
+    */
+    val query = """{"action":"EventsRouter","type":"rpc","data":[{"direction":"DESC","history":false,"evids":["%s"]}],"method":"acknowledge","tid":2}""".format(evid)
+    val res = HttpClient.Json("%s%s".format(url, addrEventConsole), new JSONObject(query), List(("Cookie", cookie)), acceptUntrustedSSL)
+
+    true
+  }
+
+  def eventsUnacknowledge(evid: String): Boolean = {
+    val query = """{"action":"EventsRouter","type":"rpc","data":[{"direction":"DESC","history":false,"evids":["%s"]}],"method":"unacknowledge","tid":2}""".format(evid)
+    val res = HttpClient.Json("%s%s".format(url, addrEventConsole), new JSONObject(query), List(("Cookie", cookie)), acceptUntrustedSSL)
+    true
+  }
+
+  def eventsClose(evid: String): Boolean = {
+    val query = """{"action":"EventsRouter","type":"rpc","data":[{"direction":"DESC","history":false,"evids":["%s"]}],"method":"close","tid":2}""".format(evid)
+    val res = HttpClient.Json("%s%s".format(url, addrEventConsole), new JSONObject(query), List(("Cookie", cookie)), acceptUntrustedSSL)
+    true
   }
 
 }
