@@ -12,7 +12,7 @@ import _root_.android.view.{View, Menu, MenuItem}
 import _root_.android.app.{ProgressDialog, AlertDialog}
 import _root_.android.content.DialogInterface
 import _root_.android.text.format.Time
-
+import _root_.android.content.DialogInterface.OnDismissListener
 import utils.CustomDeviceErrorListView
 import com.github.slashmili.Zendroid.utils.{ZenossAPI, ZenossEvents}
 import ZenossEvents._
@@ -21,8 +21,11 @@ class EventConsoleActivity extends Activity {
   var listView: ExpandableListView = _
   var txtLastTime: TextView  = _
   var mHandler = new Handler()
-
+  var dlgShowDetails: Dialog = _
   var adapter = new CustomDeviceErrorListView(this)
+  var expandedIds:List[Long] = List()
+  var selectedEvent:Store.Event = _
+  var selectedDevice:Store.ZenossDevice = _
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
 
@@ -35,6 +38,8 @@ class EventConsoleActivity extends Activity {
         val event = adapter.getChild(groupPosition, childPosition).asInstanceOf[Store.Event]
         val device = adapter.getGroup(groupPosition).asInstanceOf[Store.ZenossDevice]
         //doing some work for child
+        selectedEvent  = event
+        selectedDevice = device
         showDetails(device, event)
         true
       }
@@ -49,80 +54,72 @@ class EventConsoleActivity extends Activity {
 
 
   def showDetails(device:Store.ZenossDevice,  event: Store.Event) = {
-    val dialog = new Dialog(this)
-    dialog.setContentView(R.layout.event_detail_dialog)
-    dialog.setTitle("Event Detail")
-    val txtEventDetailDeviceName = dialog.findViewById(R.id.txtEventDetailDeviceName).asInstanceOf[TextView]
+    dlgShowDetails = new Dialog(EventConsoleActivity.this)
+    dlgShowDetails.setContentView(R.layout.event_detail_dialog)
+    dlgShowDetails.setTitle("Event Detail")
+    val txtEventDetailDeviceName = dlgShowDetails.findViewById(R.id.txtEventDetailDeviceName).asInstanceOf[TextView]
     txtEventDetailDeviceName.setText(device.getName)
-    val txtEventDetailComponent  = dialog.findViewById(R.id.txtEventDetailComponent).asInstanceOf[TextView]
+    val txtEventDetailComponent  = dlgShowDetails.findViewById(R.id.txtEventDetailComponent).asInstanceOf[TextView]
     txtEventDetailComponent.setText(event.getComponent)
-    val txtEventDetailStatus     = dialog.findViewById(R.id.txtEventDetailStatus).asInstanceOf[TextView]
+    val txtEventDetailStatus     = dlgShowDetails.findViewById(R.id.txtEventDetailStatus).asInstanceOf[TextView]
     txtEventDetailStatus.setText(event.getEventState.toString)
-    val txtEventDetailStartTime  = dialog.findViewById(R.id.txtEventDetailStartTime).asInstanceOf[TextView]
+    val txtEventDetailStartTime  = dlgShowDetails.findViewById(R.id.txtEventDetailStartTime).asInstanceOf[TextView]
     txtEventDetailStartTime.setText(event.getFirstTime)
-    val txtEventDetailLastSeen   = dialog.findViewById(R.id.txtEventDetailLastSeen).asInstanceOf[TextView]
+    val txtEventDetailLastSeen   = dlgShowDetails.findViewById(R.id.txtEventDetailLastSeen).asInstanceOf[TextView]
     txtEventDetailLastSeen.setText(event.getLastTime)
-    val txtEventDetailCount      = dialog.findViewById(R.id.txtEventDetailCount).asInstanceOf[TextView]
+    val txtEventDetailCount      = dlgShowDetails.findViewById(R.id.txtEventDetailCount).asInstanceOf[TextView]
     txtEventDetailCount.setText(event.getCount.toString)
-    val txtEventDetailMessage    = dialog.findViewById(R.id.txtEventDetailMessage).asInstanceOf[TextView]
+    val txtEventDetailMessage    = dlgShowDetails.findViewById(R.id.txtEventDetailMessage).asInstanceOf[TextView]
     txtEventDetailMessage.setText(event.getSummary)
-    val txtEventDetailSummary    = dialog.findViewById(R.id.txtEventDetailSummary).asInstanceOf[TextView]
+    val txtEventDetailSummary    = dlgShowDetails.findViewById(R.id.txtEventDetailSummary).asInstanceOf[TextView]
     txtEventDetailSummary.setText(event.getSummary)
 
+    def prompt(header: String, body:String, action: String,evid: String, eventState: String) = { 
+      new AlertDialog.Builder(EventConsoleActivity.this)
+      .setTitle(header)
+      .setMessage(body)
+      .setNegativeButton("No", new DialogInterface.OnClickListener() {
+          def onClick(dialog: DialogInterface, which:Int) ={
+            dialog.cancel
+          }
+        })
+      .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+          def onClick(dialog: DialogInterface, which:Int)= {
+              dialog.cancel
+              new SendEventRequest().execute(action, evid, eventState)
+            }
+          }
+        )
+      .show()
+    }
 
-    dialog.findViewById(R.id.btnEventDetailClose).setOnClickListener(new View.OnClickListener() {
+    dlgShowDetails.findViewById(R.id.btnEventDetailClose).setOnClickListener(new View.OnClickListener() {
         def onClick(v: View): Unit = {
-          dialog.cancel
+          dlgShowDetails.dismiss
         }
       }
     )
 
-  dialog.findViewById(R.id.btnEventDetailAckUnck).setOnClickListener(new View.OnClickListener() {
+  dlgShowDetails.findViewById(R.id.btnEventDetailAckUnck).setOnClickListener(new View.OnClickListener() {
       def onClick(v: View): Unit = {
-        val config = ZendroidPreferences.loadPref(EventConsoleActivity.this)
-        val url  = config.get("url").toString
-        val user = config.get("user").toString
-        val pass = config.get("pass").toString
-
-        val invalidSSL = if (config.get("invalid_ssl").toString == "0"){
-            false
-          } else {
-            true
-        }
-
-        val zen = new ZenossAPI(url, user, pass, invalidSSL)
-        zen.auth
-        if(event.getEventState == "New") {
-          zen.eventsAcknowledge(event.getEvID)
-          event.setEventState(Store.EventState.ACKNOWLEDGED)
-        }else {
-          zen.eventsUnacknowledge(event.getEvID)
-          event.setEventState(Store.EventState.NEW)
-        }
+        prompt("Sending Ack/Unack event","Do you want to send Ack/Unack request to server ?", "Acknowledge", event.getEvID, event.getEventState)
       }
     })
-    dialog.findViewById(R.id.btnEventDetailClear).setOnClickListener(new View.OnClickListener() {
+
+    dlgShowDetails.findViewById(R.id.btnEventDetailClear).setOnClickListener(new View.OnClickListener() {
       def onClick(v: View): Unit = {
-        val config = ZendroidPreferences.loadPref(EventConsoleActivity.this)
-        val url  = config.get("url").toString
-        val user = config.get("user").toString
-        val pass = config.get("pass").toString
-        val invalidSSL = if (config.get("invalid_ssl").toString == "0"){
-            false
-          } else {
-            true
-        }
-
-        val zen = new ZenossAPI(url, user, pass, invalidSSL)
-        zen.auth
-        zen.eventsClose(event.getEvID)
-        device.removeEvent(event.getEvID)
-        dialog.cancel
-        refreshActivity
-
+        prompt("Sending Close event", "Do you want to send Close request to server ?", "Close", event.getEvID, event.getEventState)
      }
     })
-    dialog.show()
+    
+    dlgShowDetails.setOnDismissListener(new OnDismissListener() {
+      override def onDismiss(dialog: DialogInterface) = {
+        refreshActivity
+      }
+    })
+
+    expandedIds = getExpandedIds 
+    dlgShowDetails.show()
   }
 
   def clearnotification = {
@@ -132,10 +129,11 @@ class EventConsoleActivity extends Activity {
   }
 
   def refreshActivity = {
-    adapter = new CustomDeviceErrorListView(this)
+    adapter = new CustomDeviceErrorListView(EventConsoleActivity.this)
     listView.setAdapter(adapter)
     ServiceRunner.EventStore.getDevices.foreach( x=> adapter.addItem(x._2) )
     adapter.notifyDataSetChanged()
+    restoreExpandedState(expandedIds)
     if(ServiceRunner.lastTime != null)
         txtLastTime.setText("Last events fetch: " + ServiceRunner.lastTime.format("%R"))
 
@@ -162,6 +160,7 @@ class EventConsoleActivity extends Activity {
 
   override def onPause = {
     super.onPause
+    expandedIds = getExpandedIds 
     //mHandler.removeCallbacks(mUpdateTimeTask)
   }
 
@@ -230,5 +229,78 @@ class EventConsoleActivity extends Activity {
         }
       })
     .show()
+  }
+
+
+  def getExpandedIds : List[Long] = {
+    var expandedIds:List[Long] = List()
+    if(adapter != null){
+      for(i <- 0 to adapter.getGroupCount){
+        if(listView.isGroupExpanded(i))
+          expandedIds ::= adapter.getGroupId(i)
+      } 
+    }
+    return expandedIds
+  }
+
+  def restoreExpandedState(l: List[Long]) = {
+    if(l != List()){
+      if(adapter != null){
+        for(i <- 0 to adapter.getGroupCount){
+          try {
+            val id = adapter.getGroupId(i)
+            if(l.filter(_==id) != List())
+              listView.expandGroup(i)
+          }catch {
+            case _ => {}
+          }
+        }
+      }
+    }
+  }
+
+  private class SendEventRequest extends MyAsyncTask {
+    var dialog:ProgressDialog = _ 
+    override protected def doInBackground1(action: Array[String]): String = {
+      val config = ZendroidPreferences.loadPref(EventConsoleActivity.this)
+      val url  = config.get("url").toString
+      val user = config.get("user").toString
+      val pass = config.get("pass").toString
+
+      val invalidSSL = if (config.get("invalid_ssl").toString == "0"){
+          false
+        } else {
+          true
+      }
+      //TODO:handle exceptions
+      val zen = new ZenossAPI(url, user, pass, invalidSSL)
+      zen.auth
+      if(action(0) == "Acknowledge") {
+        if(action(2) == Store.EventState.NEW) {
+          zen.eventsAcknowledge(action(1))
+          selectedEvent.setEventState(Store.EventState.ACKNOWLEDGED)
+        }else {
+          zen.eventsUnacknowledge(action(1))
+          selectedEvent.setEventState(Store.EventState.NEW)
+        }
+        dlgShowDetails.dismiss
+      }else if (action(0) =="Close") {
+        zen.eventsClose(action(1))
+        //selectedDevice.removeEvent(selectedEvent.getEvID)
+        ServiceRunner.EventStore.removeEvent(selectedDevice, selectedEvent)
+        dlgShowDetails.dismiss
+      }
+      return "checked";
+    }
+
+    override protected def onPreExecute2 () = {
+      dialog = new ProgressDialog(EventConsoleActivity.this)
+      dialog.setMessage("sending request ...")
+      dialog.show()
+    }
+
+    override protected def onPostExecute2(res: String) =  {
+      dialog.dismiss()
+    }
   }
 }

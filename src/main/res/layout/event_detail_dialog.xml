@@ -50,9 +50,9 @@
 
      <TableLayout android:layout_height="wrap_content" android:id="@+id/tableLayout1" android:layout_width="fill_parent">
 	    	<TableRow android:id="@+id/tableRow1" android:layout_width="wrap_content" android:layout_height="wrap_content">
-   				<Button android:text="Close" android:id="@+id/btnEventDetailClose" android:layout_height="wrap_content" android:layout_weight="1" android:layout_width="0dp"></Button>
-				<Button android:text="Clear" android:id="@+id/btnEventDetailClear" android:layout_height="wrap_content" android:layout_weight="1" android:layout_width="0dp"></Button>
-				<Button android:text="unAck" android:id="@+id/btnEventDetailAckUnck" android:layout_height="wrap_content" android:layout_weight="1" android:layout_width="0dp"></Button>
+   				<Button android:text="Back" android:id="@+id/btnEventDetailClose" android:layout_height="wrap_content" android:layout_weight="1" android:layout_width="0dp"></Button>
+				<Button android:text="Close" android:id="@+id/btnEventDetailClear" android:layout_height="wrap_content" android:layout_weight="1" android:layout_width="0dp"></Button>
+                <Button android:text="Ack/Unack" android:id="@+id/btnEventDetailAckUnck" android:layout_height="wrap_content" android:layout_weight="1" android:layout_width="0dp"></Button>
 	    	</TableRow>
 	   </TableLayout>
  
