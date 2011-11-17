@@ -91,29 +91,39 @@ class ZenossEvents (url: String, cookie: String, acceptUntrustedSSL:Boolean = fa
   }
 
 
-  def eventsAcknowledge(evid: String): Boolean = {
-    /*
-    TODO: handle error
-    {"tid": 2, "action": "EventsRouter", "type": "rpc", "method": "acknowledge", "result": {"success": true}}
-    {"message": "Unauthorized Calling acknowledge requires \\"Manage Events\\" permission.", "type": "exception"}',
 
-    */
+  private def checkResult(res : Option[(JSONObject, List[(String, String)])]): Boolean = {
+    if(res == None)
+      return false
+    val jsonRes = res.get._1
+    if(jsonRes.has("result") && jsonRes.getJSONObject("result").has("success")){
+      if(jsonRes.getJSONObject("result").getString("success") == "true")
+          return true
+      else 
+        return false
+    }else if(jsonRes.has("type") && jsonRes.getString("type") == "exception"){
+        throw new Exception(jsonRes.getString("message"))
+    } else
+      return false
+    true
+  }
+
+  def eventsAcknowledge(evid: String): Boolean = {
     val query = """{"action":"EventsRouter","type":"rpc","data":[{"direction":"DESC","history":false,"evids":["%s"]}],"method":"acknowledge","tid":2}""".format(evid)
     val res = HttpClient.Json("%s%s".format(url, addrEventConsole), new JSONObject(query), List(("Cookie", cookie)), acceptUntrustedSSL)
-
-    true
+    return checkResult(res)
   }
 
   def eventsUnacknowledge(evid: String): Boolean = {
     val query = """{"action":"EventsRouter","type":"rpc","data":[{"direction":"DESC","history":false,"evids":["%s"]}],"method":"unacknowledge","tid":2}""".format(evid)
     val res = HttpClient.Json("%s%s".format(url, addrEventConsole), new JSONObject(query), List(("Cookie", cookie)), acceptUntrustedSSL)
-    true
+    return checkResult(res)
   }
 
   def eventsClose(evid: String): Boolean = {
     val query = """{"action":"EventsRouter","type":"rpc","data":[{"direction":"DESC","history":false,"evids":["%s"]}],"method":"close","tid":2}""".format(evid)
     val res = HttpClient.Json("%s%s".format(url, addrEventConsole), new JSONObject(query), List(("Cookie", cookie)), acceptUntrustedSSL)
-    true
+    return checkResult(res)
   }
 
 }
@@ -127,7 +137,6 @@ object HttpClient {
   def Json(url: String, data: JSONObject,  headers: List[(String, String)], acceptUntrustedSSL:Boolean = false): Option[(JSONObject, List[(String, String)])] = {
     val postHeader = ("Content-type", "application/json") :: ("Accept", "application/json") :: headers 
     val req = Request(url, data.toString, postHeader, acceptUntrustedSSL)
-
     if (req != None )
       return Some(( new JSONObject(req.get._1), req.get._2 ))
     return None
@@ -201,7 +210,6 @@ object HttpClient {
         if (len >= 0) readOnce
       }
       readOnce
-
       return Some((bos.toString, resHeader))
 
     } catch {

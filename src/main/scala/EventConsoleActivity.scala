@@ -260,6 +260,8 @@ class EventConsoleActivity extends Activity {
   }
 
   private class SendEventRequest extends MyAsyncTask {
+    var exMessage = ""
+    var result    = false
     var dialog:ProgressDialog = _ 
     override protected def doInBackground1(action: Array[String]): String = {
       val config = ZendroidPreferences.loadPref(EventConsoleActivity.this)
@@ -272,23 +274,27 @@ class EventConsoleActivity extends Activity {
         } else {
           true
       }
-      //TODO:handle exceptions
-      val zen = new ZenossAPI(url, user, pass, invalidSSL)
-      zen.auth
-      if(action(0) == "Acknowledge") {
-        if(action(2) == Store.EventState.NEW) {
-          zen.eventsAcknowledge(action(1))
-          selectedEvent.setEventState(Store.EventState.ACKNOWLEDGED)
-        }else {
-          zen.eventsUnacknowledge(action(1))
-          selectedEvent.setEventState(Store.EventState.NEW)
+      try {
+        val zen = new ZenossAPI(url, user, pass, invalidSSL)
+        zen.auth
+        if(action(0) == "Acknowledge") {
+          if(action(2) == Store.EventState.NEW) {
+            result = zen.eventsAcknowledge(action(1))
+            selectedEvent.setEventState(Store.EventState.ACKNOWLEDGED)
+          }else {
+            result = zen.eventsUnacknowledge(action(1))
+            selectedEvent.setEventState(Store.EventState.NEW)
+          }
+          dlgShowDetails.dismiss
+        }else if (action(0) =="Close") {
+          result = zen.eventsClose(action(1))
+          ServiceRunner.EventStore.removeEvent(selectedDevice, selectedEvent)
+          dlgShowDetails.dismiss
         }
-        dlgShowDetails.dismiss
-      }else if (action(0) =="Close") {
-        zen.eventsClose(action(1))
-        //selectedDevice.removeEvent(selectedEvent.getEvID)
-        ServiceRunner.EventStore.removeEvent(selectedDevice, selectedEvent)
-        dlgShowDetails.dismiss
+      } catch {
+        case e =>
+        exMessage = e.getMessage
+        //TODO:e = ServiceRunner.lastThrowableError
       }
       return "checked";
     }
@@ -300,6 +306,19 @@ class EventConsoleActivity extends Activity {
     }
 
     override protected def onPostExecute2(res: String) =  {
+      if (result == false){
+        if(exMessage == "")
+            exMessage = "UnknowError"
+        new AlertDialog.Builder(EventConsoleActivity.this)
+        .setTitle("Error")
+        .setMessage(exMessage)
+        .setNegativeButton("close", new DialogInterface.OnClickListener() {
+            def onClick(dialog: DialogInterface, which:Int) ={
+              dialog.cancel
+            }
+          })
+        .show()
+      }
       dialog.dismiss()
     }
   }
