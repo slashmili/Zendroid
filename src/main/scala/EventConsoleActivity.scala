@@ -3,7 +3,7 @@ package com.github.slashmili.Zendroid
 import _root_.android.app.{Activity, NotificationManager, Dialog}
 import _root_.android.os.{Bundle, Handler}
 import _root_.android.view.View
-import _root_.android.widget.{ExpandableListView, Toast, TextView}
+import _root_.android.widget.{ExpandableListView, Toast, TextView, ImageView}
 import _root_.android.content.{Intent, Context}
 import _root_.com.github.slashmili.Zendroid.Services.ServiceRunner
 import _root_.com.github.slashmili.Zendroid.Services._
@@ -73,6 +73,15 @@ class EventConsoleActivity extends Activity {
     txtEventDetailMessage.setText(event.getSummary)
     val txtEventDetailSummary    = dlgShowDetails.findViewById(R.id.txtEventDetailSummary).asInstanceOf[TextView]
     txtEventDetailSummary.setText(event.getSummary)
+
+    var icon = event.getSeverity match {
+      case 3 => R.drawable.severity3_notify
+      case 4 => R.drawable.severity4_notify
+      case 5 => R.drawable.severity5_notify
+      case _ => 0
+    }
+    val imgEventDetailSeverityIcon = dlgShowDetails.findViewById(R.id.imgEventDetailSeverityIcon).asInstanceOf[ImageView]
+    imgEventDetailSeverityIcon.setImageResource(icon)
 
     def prompt(header: String, body:String, action: String,evid: String, eventState: String) = { 
       new AlertDialog.Builder(EventConsoleActivity.this)

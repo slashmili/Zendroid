@@ -46,6 +46,12 @@ class CustomDeviceErrorListView (context: Context) extends BaseExpandableListAda
       case _ => 0
     }
 
+    val ic = cv.findViewById(R.id.imgEventAcknowledgedIcon).asInstanceOf[ImageView]
+    if(ev.getEventState == Store.EventState.ACKNOWLEDGED){
+      ic.setImageResource(R.drawable.acknowledged_icon)
+    }else {
+      ic.setImageResource(0)
+    }
     tv.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
     tv.setCompoundDrawablesWithIntrinsicBounds(icon, 0, 0, 0);
 

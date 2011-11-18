@@ -2,11 +2,11 @@
         android:layout_height="45dip"
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="fill_parent">
+        <ImageView android:id="@+id/imgEventAcknowledgedIcon" android:layout_width="wrap_content" android:layout_height="wrap_content" ></ImageView>
         <TextView
-                android:layout_height="45dip"
+                android:layout_height="50dip"
                 android:layout_width="fill_parent"
                 android:paddingLeft="5dip"
-                android:paddingRight="5dip" 
                 android:gravity="center_vertical" android:id="@+id/tvChild"
                 android:text="Children"></TextView>
 </LinearLayout>
