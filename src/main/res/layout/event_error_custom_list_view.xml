@@ -9,7 +9,7 @@
         </ImageView>
         -->
         <TextView android:layout_width="fill_parent"
-                android:layout_height="45dip" android:paddingLeft="5dip"
+                android:layout_height="50dip" android:paddingLeft="5dip"
                 android:paddingRight="5dip" 
                 android:gravity="center_vertical" android:id="@+id/tvChild"
                 android:text="Children"></TextView>
