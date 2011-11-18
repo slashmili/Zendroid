@@ -1,11 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/mnuLastStatus"
-        android:title="Last Status" />
+        android:title="Last Status" 
+        android:icon="@drawable/ic_menu_connect"
+        />
     <item android:id="@+id/mnuRefresh"
-        android:title="Refresh" />
+        android:title="Refresh" 
+        android:icon="@drawable/ic_menu_refresh"
+        />
     <item android:id="@+id/mnuAccount"
-        android:title="Settings" />
+        android:title="Settings"
+        android:icon="@drawable/ic_menu_settings"
+        />
     <item android:id="@+id/mnuAbout"
-        android:title="About" />
+        android:title="About"
+        android:icon="@drawable/ic_menu_about"
+        />
 </menu>

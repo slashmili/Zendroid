@@ -77,6 +77,16 @@ class EventConsoleActivity extends Activity {
     return true
   }
 
+  override def onPrepareOptionsMenu(menu: Menu): Boolean = {
+    if (ServiceRunner.started == false || ServiceRunner.errorMessage != "")
+    {
+      menu.findItem(R.id.mnuLastStatus).setIcon(R.drawable.ic_menu_connect)
+    }else {
+      menu.findItem(R.id.mnuLastStatus).setIcon(R.drawable.ic_menu_connected)
+    }
+    return true
+  }
+
   override def onOptionsItemSelected(item: MenuItem): Boolean ={
     item.getItemId match {
       case R.id.mnuLastStatus    => openLastStatusPopup
