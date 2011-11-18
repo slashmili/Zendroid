@@ -110,13 +110,22 @@ class EventConsoleActivity extends Activity {
 
 
   def openLastStatusPopup() = {
+    val config = ZendroidPreferences.loadPref(EventConsoleActivity.this)
     var lastRunStatus = if (ServiceRunner.started == false){
       "You haven't run Zenroid service yet"
     }
     else if (ServiceRunner.errorMessage == "" ){
       "Clean"
-    }else {
-      ServiceRunner.lastThrowableError.getMessage
+    }
+    else if (config.get("update").toString.toInt == 0){
+      "Zenroid is disabled"
+    }
+    else {
+      try {
+        ServiceRunner.lastThrowableError.getMessage
+      } catch {
+        case _ => ServiceRunner.errorMessage
+      }
     }
     lastRunStatus = "Last Error: " + lastRunStatus
     new AlertDialog.Builder(EventConsoleActivity.this)

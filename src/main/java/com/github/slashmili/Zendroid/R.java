@@ -17,27 +17,32 @@ public final class R {
     }
     public static final class drawable {
         public static final int buy_me_beer=0x7f020000;
-        public static final int network=0x7f020001;
-        public static final int noicon=0x7f020002;
-        public static final int router=0x7f020003;
-        public static final int server=0x7f020004;
-        public static final int server_linux=0x7f020005;
-        public static final int server_windows=0x7f020006;
-        public static final int severity=0x7f020007;
-        public static final int severity3=0x7f020008;
-        public static final int severity3_background=0x7f020009;
-        public static final int severity3_background_noevent=0x7f02000a;
-        public static final int severity3_notify=0x7f02000b;
-        public static final int severity4=0x7f02000c;
-        public static final int severity4_background=0x7f02000d;
-        public static final int severity4_background_noevent=0x7f02000e;
-        public static final int severity4_notify=0x7f02000f;
-        public static final int severity5=0x7f020010;
-        public static final int severity5_background=0x7f020011;
-        public static final int severity5_background_noevent=0x7f020012;
-        public static final int severity5_notify=0x7f020013;
-        public static final int small_widget_error_background=0x7f020014;
-        public static final int zendroid_icon=0x7f020015;
+        public static final int ic_menu_about=0x7f020001;
+        public static final int ic_menu_connect=0x7f020002;
+        public static final int ic_menu_connected=0x7f020003;
+        public static final int ic_menu_refresh=0x7f020004;
+        public static final int ic_menu_settings=0x7f020005;
+        public static final int network=0x7f020006;
+        public static final int noicon=0x7f020007;
+        public static final int router=0x7f020008;
+        public static final int server=0x7f020009;
+        public static final int server_linux=0x7f02000a;
+        public static final int server_windows=0x7f02000b;
+        public static final int severity=0x7f02000c;
+        public static final int severity3=0x7f02000d;
+        public static final int severity3_background=0x7f02000e;
+        public static final int severity3_background_noevent=0x7f02000f;
+        public static final int severity3_notify=0x7f020010;
+        public static final int severity4=0x7f020011;
+        public static final int severity4_background=0x7f020012;
+        public static final int severity4_background_noevent=0x7f020013;
+        public static final int severity4_notify=0x7f020014;
+        public static final int severity5=0x7f020015;
+        public static final int severity5_background=0x7f020016;
+        public static final int severity5_background_noevent=0x7f020017;
+        public static final int severity5_notify=0x7f020018;
+        public static final int small_widget_error_background=0x7f020019;
+        public static final int zendroid_icon=0x7f02001a;
     }
     public static final class id {
         public static final int LinearLayout01=0x7f080011;
