@@ -9,6 +9,7 @@ android:versionName="2.0" android:versionCode="2" package="com.github.slashmili.
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.LAUNCHER"></category>
+                <action android:name="com.github.slashmili.Zendroid.REFRESHACTIVITY"></action>
             </intent-filter>
         </activity>
         <activity android:label="About Zenroid" android:name=".MainActivity" />

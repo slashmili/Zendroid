@@ -4,7 +4,7 @@ import _root_.android.app.{Activity, NotificationManager}
 import _root_.android.os.{Bundle, Handler}
 import _root_.android.view.View
 import _root_.android.widget.{ExpandableListView, Toast, TextView}
-import _root_.android.content.{Intent, Context}
+import _root_.android.content.{Intent, Context, IntentFilter, BroadcastReceiver}
 import _root_.com.github.slashmili.Zendroid.Services.ServiceRunner
 import _root_.android.util.Log
 import _root_.android.view.{View, Menu, MenuItem}
@@ -20,6 +20,12 @@ class EventConsoleActivity extends Activity {
   var mHandler = new Handler()
 
   val adapter = new CustomDeviceErrorListView(this)
+
+  val receiver = new BroadcastReceiver() {
+    override def onReceive(context: Context, intent:Intent) ={
+      refreshActivity
+    }
+  }
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
 
@@ -35,7 +41,7 @@ class EventConsoleActivity extends Activity {
   }
 
 
-  def clearnotification = {
+  def clearNotification = {
     val ns   = Context.NOTIFICATION_SERVICE;
     val nm   = getSystemService(ns).asInstanceOf[NotificationManager]
     ServiceRunner.EventStore.eventIDs.foreach(nm.cancel(_, 0) )
@@ -51,28 +57,18 @@ class EventConsoleActivity extends Activity {
 
   }
   
-  /*
-  var mUpdateTimeTask = new Runnable() {
-    def run = {
-      refreshActivity
-      Log.d("EventConsoleActivity", "WWWWWWORKS")
-      mHandler.postAtTime(this, System.currentTimeMillis() + 30000) //refresh Activity after .5 min
-    }
-  }
-  */
   override def onResume = {
     super.onResume
-    /*
-    mHandler.removeCallbacks(mUpdateTimeTask)
-    mHandler.postDelayed(mUpdateTimeTask, 100)
-    */
+    val filter = new IntentFilter
+    filter.addAction("com.github.slashmili.Zendroid.REFRESHACTIVITY")
+    registerReceiver(receiver, filter)
     refreshActivity
-    clearnotification
+    clearNotification
   }
 
   override def onPause = {
     super.onPause
-    //mHandler.removeCallbacks(mUpdateTimeTask)
+    unregisterReceiver(receiver)
   }
 
   override def onCreateOptionsMenu(menu: Menu): Boolean ={
@@ -89,7 +85,10 @@ class EventConsoleActivity extends Activity {
         startActivity(conf)
       }
       case R.id.mnuRefresh => {
-        refreshActivity
+        ServiceRunner.startService(this)
+        val context = getApplicationContext()
+        val toast = Toast.makeText(context, "Fetching events ..." , Toast.LENGTH_SHORT)
+        toast.show()
       }
       case R.id.mnuAbout         => {
         val about = new Intent(EventConsoleActivity.this, classOf[MainActivity])

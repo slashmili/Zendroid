@@ -186,6 +186,9 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
     try {
       ServiceRunner.errorMessage = ""
       requestLastEvent(this)
+      val broadcast = new Intent
+      broadcast.setAction("com.github.slashmili.Zendroid.REFRESHACTIVITY")
+      sendBroadcast(broadcast)
     }catch {
       case e => {
         ServiceRunner.errorMessage = e.toString

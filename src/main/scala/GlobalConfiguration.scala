@@ -217,7 +217,7 @@ class GlobalConfiguration extends Activity  {
   }
 
   def runAndExit () ={
-      ServiceRunner.startService(this);
+      ServiceRunner.startService(this)
 
       val toastMessage = if(updateEvery==0){
         "Stoping monitoring ..."
