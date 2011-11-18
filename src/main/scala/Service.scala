@@ -260,19 +260,31 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
         ServiceRunner.EventStore.cleanDevices
         for(i <- 0 to  events.length -1 ){
           val JO = new JSONObject( events.get(i).toString)
+          //val JO = events.get(i).asInstanceOf[JSONObject]
             //TODO make a method for this shits
 
-          val uid        = JO.getJSONObject("device").getString("uid")
-          val hostname   = JO.getJSONObject("device").getString("text").trim
-          val errorText  = JO.getString("summary")
+          val uid        = if(JO.has("device") && JO.getJSONObject("device").has("uid"))
+              JO.getJSONObject("device").getString("uid")
+            else
+              ""
+          val hostname   = if(JO.has("device") && JO.getJSONObject("device").has("text"))
+              JO.getJSONObject("device").getString("text").trim
+            else
+              ""
+          val errorText  = if(JO.has("summary") == true)
+              JO.getString("summary")
+            else
+              ""
           val eventId    = JO.getString("evid")
           val countError = JO.getString("count").toInt
           val severity   = JO.getString("severity").toInt
           val eventState = JO.getString("eventState")
           val firstTime  = JO.getString("firstTime")
           val lastTime   = JO.getString("lastTime")
-          val component  = JO.getJSONObject("component").getString("text")
-
+          val component  = if(JO.has("component"))
+              JO.getJSONObject("component").getString("text")
+            else
+              ""
           if(JO.has("device") && JO.getJSONObject("device").has("text")){
             if(match_d == "") {
               if(JO.has("severity")){
