@@ -32,9 +32,12 @@ object ServiceRunner {
   val lastTime = new Time()
   val TAG = "Zendroid.Services.ServiceRunner"
 
-  def startService (context: Context) = {
-    started = true
-    context.startService(new Intent(context, classOf[ZenossUpdateService]))
+  def startService (context: Context, runOnce:Boolean = false) = {
+    if (runOnce == false)
+      started = true
+    val s = new Intent(context, classOf[ZenossUpdateService])
+    s.putExtra("Zendroid.Service.RunOnce", runOnce.toString)
+    context.startService(s)
   }
 
   object WdigetStore {
@@ -185,7 +188,11 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
     var appWidgetManager = AppWidgetManager.getInstance(this);
     try {
       ServiceRunner.errorMessage = ""
-      requestLastEvent(this)
+      val runOnce = if(intent.getStringExtra("Zendroid.Service.RunOnce") == "true")
+          true
+        else
+          false
+      requestLastEvent(this, runOnce)
       val broadcast = new Intent
       broadcast.setAction("com.github.slashmili.Zendroid.REFRESHACTIVITY")
       sendBroadcast(broadcast)
@@ -208,7 +215,7 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
     return Some(Map("severity5" -> ServiceRunner.criticalEvent.toString, "severity4" -> ServiceRunner.errorEvent.toString, "severity3" -> ServiceRunner.warninigEvent.toString))
   }
 
-  def requestLastEvent(context: Context) : Option[Map[String, String]] = {
+  def requestLastEvent(context: Context, runOnce: Boolean = false) : Option[Map[String, String]] = {
     val zp = ZendroidPreferences.loadPref(context)
     if(zp == None){
       ServiceRunner.criticalEvent = 0
@@ -216,20 +223,22 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
       ServiceRunner.warninigEvent = 0    
       return Some(Map("severity5" -> "0", "severity4" -> "0", "severity3" -> "0"))
     }
-    if(zp.get("update").toString.toInt == 0){
+    if(zp.get("update").toString.toInt == 0 && runOnce == false){
       ServiceRunner.errorMessage = "Zenroid is disabled"
       return None
     }
 
-    //remove previous alarm
     val updateIntent = new Intent(ACTION_UPDATE_ALL)
     updateIntent.setClass(this, classOf[ZenossUpdateService])
     val pendingIntent = PendingIntent.getService(this, 0, updateIntent, 0);
-    if(ServiceRunner.alarmManager != Nil){
-    try {
-        ServiceRunner.alarmManager.cancel(pendingIntent)
-      }catch {
-        case e => Log.d("Service", "Tried to cancel alaram but faild, " + e.toString)
+    if(runOnce == false){
+      //remove previous alarm
+      if(ServiceRunner.alarmManager != Nil){
+      try {
+          ServiceRunner.alarmManager.cancel(pendingIntent)
+        }catch {
+          case e => Log.d("Service", "Tried to cancel alaram but faild, " + e.toString)
+        }
       }
     }
     try {
@@ -324,14 +333,16 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
     }catch {
       case e =>  throw e;
     }finally {
-      //set new alarm
-      ServiceRunner.alarmManager = getSystemService(Context.ALARM_SERVICE).asInstanceOf[AlarmManager]
-      ServiceRunner.nextTime = new Time()
-      val updateEvery = zp.get("update").toString.toInt
-      ServiceRunner.nextTime.set(System.currentTimeMillis() + updateEvery)
-      val nextUpdate = ServiceRunner.nextTime.toMillis(false)
-      ServiceRunner.alarmManager.set(AlarmManager.RTC_WAKEUP, nextUpdate, pendingIntent)
-      Log.d("ZenossUpdateService.getLastEvent", " will be called Later (" + ServiceRunner.nextTime.format("%R") + ")")
+      if(runOnce == false){
+        //set new alarm
+        ServiceRunner.alarmManager = getSystemService(Context.ALARM_SERVICE).asInstanceOf[AlarmManager]
+        ServiceRunner.nextTime = new Time()
+        val updateEvery = zp.get("update").toString.toInt
+        ServiceRunner.nextTime.set(System.currentTimeMillis() + updateEvery)
+        val nextUpdate = ServiceRunner.nextTime.toMillis(false)
+        ServiceRunner.alarmManager.set(AlarmManager.RTC_WAKEUP, nextUpdate, pendingIntent)
+        Log.d("ZenossUpdateService.getLastEvent", " will be called Later (" + ServiceRunner.nextTime.format("%R") + ")")
+      }
     }
     return None
   }

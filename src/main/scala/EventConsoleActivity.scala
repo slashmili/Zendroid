@@ -95,9 +95,15 @@ class EventConsoleActivity extends Activity {
         startActivity(conf)
       }
       case R.id.mnuRefresh => {
-        ServiceRunner.startService(this)
+        val config = ZendroidPreferences.loadPref(EventConsoleActivity.this)
+        val toastMsg = if( config == None || config.get("url").toString == "")
+            "First config Zenoss Settings"
+          else{
+            ServiceRunner.startService(this, true)
+            "Fetching events ..."
+          }
         val context = getApplicationContext()
-        val toast = Toast.makeText(context, "Fetching events ..." , Toast.LENGTH_SHORT)
+        val toast = Toast.makeText(context, toastMsg , Toast.LENGTH_LONG)
         toast.show()
       }
       case R.id.mnuAbout         => {
