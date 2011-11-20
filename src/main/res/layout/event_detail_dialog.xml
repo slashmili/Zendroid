@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:gravity="center_vertical">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+ 
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:weightSum="1" >
+    <LinearLayout android:id="@+id/linearLayout1" android:layout_height="wrap_content" android:layout_width="fill_parent" android:orientation="vertical" android:padding="2pt">
+
+
+	    <LinearLayout android:id="@+id/linearLayout1" android:layout_height="match_parent" android:layout_width="fill_parent" android:orientation="horizontal" >
+	        <ImageView android:id="@+id/imgEventDetailSeverityIcon" android:layout_width="24px" android:layout_height="24px" ></ImageView>
+	        <TextView android:textAppearance="?android:attr/textAppearanceLarge" android:layout_width="fill_parent" android:id="@+id/txtEventDetailSummary" android:layout_height="wrap_content" android:text="SNMP agent down"></TextView>
+	    </LinearLayout>
+
+
+
+
+	    <TableLayout android:layout_height="wrap_content" android:id="@+id/tableLayout1" android:layout_width="fill_parent">
+	        <TableRow android:id="@+id/tableRow1" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:layout_width="wrap_content" android:id="@+id/textView2" android:layout_height="wrap_content" android:text="Device: "></TextView>
+	        	<TextView android:layout_width="wrap_content" android:id="@+id/txtEventDetailDeviceName" android:layout_height="wrap_content" android:layout_weight="1" android:text=""></TextView>
+	        </TableRow>
+	        <TableRow android:id="@+id/tableRow2" android:layout_width="wrap_content" android:layout_height="wrap_content">
+	        	<TextView android:text="Component: " android:textAppearance="?android:attr/textAppearanceMedium" android:layout_width="wrap_content" android:id="@+id/textView4" android:layout_height="wrap_content" ></TextView>
+	        	<TextView android:text="" android:layout_width="wrap_content" android:id="@+id/txtEventDetailComponent" android:layout_height="wrap_content" android:layout_weight="1" ></TextView>	        
+	        </TableRow>
+	        <TableRow android:id="@+id/tableRow3" android:layout_width="wrap_content" android:layout_height="wrap_content">
+	        	<TextView android:text="Status: " android:textAppearance="?android:attr/textAppearanceMedium" android:layout_width="wrap_content" android:id="@+id/textView4" android:layout_height="wrap_content" ></TextView>
+	        	<TextView android:text="" android:layout_width="wrap_content" android:id="@+id/txtEventDetailStatus" android:layout_height="wrap_content" android:layout_weight="1" ></TextView>	        
+	        </TableRow>
+	        <TableRow android:id="@+id/tableRow4" android:layout_width="wrap_content" android:layout_height="wrap_content">
+	        	<TextView android:text="Start Time: " android:textAppearance="?android:attr/textAppearanceMedium" android:layout_width="wrap_content" android:id="@+id/textView4" android:layout_height="wrap_content" ></TextView>
+	        	<TextView android:text="" android:layout_width="wrap_content" android:id="@+id/txtEventDetailStartTime" android:layout_height="wrap_content" android:layout_weight="1" ></TextView>	        	        
+	        </TableRow>
+	        <TableRow android:id="@+id/tableRow4" android:layout_width="wrap_content" android:layout_height="wrap_content">
+	        	<TextView android:text="Last Seen: " android:textAppearance="?android:attr/textAppearanceMedium" android:layout_width="wrap_content" android:id="@+id/textView4" android:layout_height="wrap_content" ></TextView>
+	        	<TextView android:text="" android:layout_width="wrap_content" android:id="@+id/txtEventDetailLastSeen" android:layout_height="wrap_content" android:layout_weight="1" ></TextView>	        
+	        </TableRow>
+	        <TableRow android:id="@+id/tableRow4" android:layout_width="wrap_content" android:layout_height="wrap_content">
+	        	<TextView android:text="Count: " android:textAppearance="?android:attr/textAppearanceMedium" android:layout_width="wrap_content" android:id="@+id/textView4" android:layout_height="wrap_content" ></TextView>
+	        	<TextView android:text="" android:layout_width="wrap_content" android:id="@+id/txtEventDetailCount" android:layout_height="wrap_content" android:layout_weight="1" ></TextView>
+	        </TableRow>
+	        <TableRow android:id="@+id/tableRow4" android:layout_width="wrap_content" android:layout_height="wrap_content">
+	        	<TextView android:text="Message: " android:textAppearance="?android:attr/textAppearanceMedium" android:layout_width="wrap_content" android:id="@+id/textView4" android:layout_height="wrap_content" ></TextView>
+	        	<TextView android:text="" android:layout_width="wrap_content" android:id="@+id/txtEventDetailMessage" android:layout_height="wrap_content" 
+	        	android:layout_weight="1"
+	        	></TextView>	        
+	        </TableRow>     
+	    </TableLayout>        	    
+
+     <TableLayout android:layout_height="wrap_content" android:id="@+id/tableLayout1" android:layout_width="fill_parent">
+	    	<TableRow android:id="@+id/tableRow1" android:layout_width="fill_parent" android:layout_height="wrap_content">
+   				<Button android:text="Back" android:id="@+id/btnEventDetailClose" android:layout_height="wrap_content" android:layout_weight="1" ></Button>
+				<Button android:text="Close" android:id="@+id/btnEventDetailClear" android:layout_height="wrap_content" android:layout_weight="1" ></Button>
+                <Button android:text="Ack/Unack" android:id="@+id/btnEventDetailAckUnck" android:layout_height="wrap_content" android:layout_weight="1" ></Button>
+	    	</TableRow>
+	   </TableLayout>
+ 
+	    
+    </LinearLayout>
+
+
+</LinearLayout>
+</ScrollView>

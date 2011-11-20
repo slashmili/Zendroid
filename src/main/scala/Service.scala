@@ -177,6 +177,13 @@ object ServiceRunner {
     def countError(uid: String)    = devices.get(uid).get.countError
     def countWarning               = devices.foldLeft(0)(_ + _._2.countWarning)
     def countWarning(uid: String)  = devices.get(uid).get.countWarning
+    def removeEvent(from: ZenossDevice, event: Event) = {
+      if(from.getEvents.length == 1){
+        devices = devices.filter(x => from.getName != x._2.getName)
+      }else {
+        from.removeEvent(event.getEvID)
+      }
+    }
   }
 }
 

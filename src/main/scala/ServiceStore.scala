@@ -11,11 +11,18 @@ object EventState {
     val NEW          = "New"
     val ACKNOWLEDGED = "Acknowledged"
     val SUPPRESSED   = "Suppressed"
+    val UNKNOWN      = "Unknown"
 } 
-class Event (evid: String, summary: String, severity: Int, count: Int, eventState: String, firstTime: String, lastTime: String, component: String){
+class Event (evid: String, summary: String, severity: Int, count: Int, var eventState: String, firstTime: String, lastTime: String, component: String){
   def getSeverity = severity
   def getSummary  = summary
   def getEvID     = evid
+  def getCount    = count
+  def getEventState = eventState
+  def setEventState(s: String) = { eventState = s }
+  def getFirstTime = firstTime
+  def getLastTime = lastTime
+  def getComponent = component
 }
 
 class ZenossDevice(uid: String, name: String){
@@ -37,7 +44,9 @@ class ZenossDevice(uid: String, name: String){
   }
 
   def countEvents = events.size
-
+  def removeEvent(evid: String) = {
+    events = events.filter(_.getEvID != evid)
+  }
   def getEvent(id: Int) = events(id)
   def getEvents = events
   def addEvent(evid: String, summary: String, severity: Int, count: Int, eventState: String, firstTime: String, lastTime: String, component: String) ={
