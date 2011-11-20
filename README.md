@@ -3,7 +3,7 @@ How To install
 
 1. Go to Android market and install [Zendroid](https://market.android.com/details?id=com.github.slashmili.Zendroid&feature=search_result)
 
-2. Compile it from source
+2. Compile it from source ([Document for setting up envirnment](https://github.com/slashmili/Zendroid/wiki/How-to-Compile-Zenroid))
 
 
 Screenshot
