@@ -82,7 +82,7 @@ class ZenossEvents (url: String, cookie: String, acceptUntrustedSSL:Boolean = fa
   val addrEventConsole = "/zport/dmd/evconsole_router"
   def eventsQuery : Option[JSONObject] = {
     val l = """{"action":"EventsRouter","method":"query","data":[{"criteria":[{"prodState":"1000"}],"start":0,"limit":100,"dir":"DESC","sort":"lastTime","params":"{\"severity\":[5,4,3],\"eventState\":[0,1]}"}],"type":"rpc","tid":1}"""
-    val res = HttpClient.Json("%s%s".format(url, addrEventConsole, new JSONObject(l), List(("Cookie", cookie)), acceptUntrustedSSL)
+    val res = HttpClient.Json("%s%s".format(url, addrEventConsole), new JSONObject(l), List(("Cookie", cookie)), acceptUntrustedSSL)
     Log.d(res.toString)
     if(res == None)
       return None
