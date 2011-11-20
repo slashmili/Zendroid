@@ -14,4 +14,8 @@
         <item>Every 1 hour</item>
         <item>Disable</item>
     </string-array>    
+    <string-array name="sync_over">
+        <item>Mobile Network and WI-FI</item>
+        <item>Only WI-FI</item>
+    </string-array>
 </resources>

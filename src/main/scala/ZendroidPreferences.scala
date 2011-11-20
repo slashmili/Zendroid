@@ -16,9 +16,10 @@ object ZendroidPreferences {
   val PREFIX_KEY_ON_WARNING   = "prefix_onwarning"
   val PREFIX_KEY_INVALID_SSL  = "prefix_invalidssl"
   val PREFIX_KEY_UPDATE_EVERY = "prefix_updateevery"
+  val PREFIX_RUN_ON           = "prefix_syncover"
 
   // Write the prefix to the SharedPreferences object for this widget
-  def savePref(context: Context, url: String, user: String, pass: String, onCritical: Int, onError:Int, onWarning:Int, match_d: String, invalidSSL:Int, updateEvery: Int) = {
+  def savePref(context: Context, url: String, user: String, pass: String, onCritical: Int, onError:Int, onWarning:Int, match_d: String, invalidSSL:Int, updateEvery: Int, syncOver:String) = {
     val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
     //Save
     prefs.putString(PREFIX_KEY_URL, url)
@@ -30,6 +31,7 @@ object ZendroidPreferences {
     prefs.putString(PREFIX_KEY_ON_WARNING, onWarning.toString)
     prefs.putString(PREFIX_KEY_INVALID_SSL, invalidSSL.toString)
     prefs.putString(PREFIX_KEY_UPDATE_EVERY, updateEvery.toString)
+    prefs.putString(PREFIX_RUN_ON, syncOver.toString)
     prefs.commit()
   }
 
@@ -47,6 +49,7 @@ object ZendroidPreferences {
     val onWarning   = prefs.getString(PREFIX_KEY_ON_WARNING, null)
     val invalidSSL  = prefs.getString(PREFIX_KEY_INVALID_SSL, null)
     val updateEvery = prefs.getString(PREFIX_KEY_UPDATE_EVERY, null)
+    val syncOver    = prefs.getString(PREFIX_RUN_ON, "always")
 
     try {
       pass = SimpleCrypto.decrypt(ENCRYPT_KEY, pass)
@@ -57,6 +60,6 @@ object ZendroidPreferences {
     if(url == null || user == null || pass == null || updateEvery == null) 
       return None
 
-    return Some(Map("url" -> url, "user" -> user, "pass" -> pass, "update" -> updateEvery, "match" -> matchDevice, "on_critical" -> onCritical, "on_error"->onError, "on_warning"->onWarning, "invalid_ssl"->invalidSSL))
+    return Some(Map("url" -> url, "user" -> user, "pass" -> pass, "update" -> updateEvery, "match" -> matchDevice, "on_critical" -> onCritical, "on_error"->onError, "on_warning"->onWarning, "invalid_ssl"->invalidSSL, "sync_over"->syncOver))
   }
 }

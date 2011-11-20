@@ -76,6 +76,12 @@
             <TextView android:layout_width="wrap_content" android:id="@+id/textView8" android:text="Update Every : " android:layout_height="wrap_content" android:layout_gravity="center_vertical"></TextView>
             <Spinner android:id="@+id/spnUpdateEvery" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_weight="1"></Spinner>
         </TableRow>
+
+        <TableRow android:id="@+id/tableRow13" android:layout_width="wrap_content" android:layout_height="wrap_content">
+            <TextView android:layout_width="wrap_content" android:id="@+id/textView13" android:text="Sync Over : " android:layout_height="wrap_content" android:layout_gravity="center_vertical"></TextView>
+            <Spinner android:id="@+id/spnSyncOver" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_weight="1"></Spinner>
+        </TableRow>
+
         <TableRow android:id="@+id/tableRow10" android:layout_width="wrap_content" android:layout_height="wrap_content">
             <TextView android:layout_width="wrap_content" android:id="@+id/textView9" android:text="Match Device : " android:layout_height="wrap_content" android:layout_gravity="center_vertical"></TextView>
             <EditText 

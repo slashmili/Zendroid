@@ -13,6 +13,8 @@ import _root_.org.apache.http.conn.ConnectTimeoutException
 import _root_.javax.net.ssl.SSLException
 import _root_.java.net.{UnknownHostException, SocketException}
 import _root_.java.io.IOException
+import _root_.android.net.{NetworkInfo, ConnectivityManager}
+import _root_.android.net.wifi.{WifiManager, WifiInfo}
 
 import com.github.slashmili.Zendroid.utils._
 import ZenossEvents._
@@ -199,6 +201,17 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
           true
         else
           false
+
+      //check if it should be worked only over wifi
+      val zp     = ZendroidPreferences.loadPref(this)
+      val conMan = getSystemService(Context.CONNECTIVITY_SERVICE).asInstanceOf[ConnectivityManager]
+      val mWifi  = conMan.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
+      if(runOnce == false
+        && zp.get("sync_over").toString == "wifi"
+        && mWifi.isConnected == false){
+           Log.d("Zenroid.Service", "WI-FI connectivity is " + mWifi.isConnected().toString)
+           throw new Exception("Zenroid is only available over WI-FI")
+      }
       requestLastEvent(this, runOnce)
       val broadcast = new Intent
       broadcast.setAction("com.github.slashmili.Zendroid.REFRESHACTIVITY")

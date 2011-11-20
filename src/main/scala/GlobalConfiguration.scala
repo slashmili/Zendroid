@@ -46,6 +46,7 @@ class GlobalConfiguration extends Activity  {
   var spnOnError:Spinner = _
   var spnOnWarning:Spinner = _
   var spnUpdateEvery:Spinner = _
+  var spnSyncOver:Spinner = _
   var txtMatchDevice:EditText = _
   var chkInvalidSSL:CheckBox = _
 
@@ -54,6 +55,7 @@ class GlobalConfiguration extends Activity  {
   var onCritical:Int = Alarm.ALARM_WITH_NOTIFICATION_AND_SOUND
   var onError:Int    = Alarm.ALARM_WITH_NOTIFICATION_AND_SOUND
   var onWarning:Int  = Alarm.ALARM_WITH_NOTIFICATION_AND_SOUND
+  var syncOver       = "always"
   var saveSettingsCheck = false
   var finishedSavingProcess = false 
   var errorMessage = ""
@@ -137,6 +139,21 @@ class GlobalConfiguration extends Activity  {
         def onNothingSelected(parrent: AdapterView[_]) = {
         }
       })  
+
+    val syncAdapter = ArrayAdapter.createFromResource(this, R.array.sync_over, android.R.layout.simple_spinner_item);
+    syncAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+    spnSyncOver = findViewById(R.id.spnSyncOver).asInstanceOf[Spinner]
+    spnSyncOver.setAdapter(syncAdapter)
+    spnSyncOver.setOnItemSelectedListener(new OnItemSelectedListener() {
+        def onItemSelected (parrent: AdapterView[_], v: View, position: Int, id:Long) ={
+          syncOver = position match {
+            case 1 => "wifi"
+            case _ => "always"
+          }
+        }
+        def onNothingSelected(parrent: AdapterView[_]) = {
+        }
+      })
     //load setting if saved before
     loadSettings
   }
@@ -213,7 +230,7 @@ class GlobalConfiguration extends Activity  {
       } else {
         0
       }
-      ZendroidPreferences.savePref(GlobalConfiguration.this, url, user, pass, onCritical, onError, onWarning, matchDevice, invalidSSL, updateEvery)
+      ZendroidPreferences.savePref(GlobalConfiguration.this, url, user, pass, onCritical, onError, onWarning, matchDevice, invalidSSL, updateEvery, syncOver)
   }
 
   def runAndExit () ={
@@ -254,6 +271,12 @@ class GlobalConfiguration extends Activity  {
         case UpdatePeriod.DISABLED      => spnUpdateEvery.setSelection(5)
         case _ => spnUpdateEvery.setSelection(0)
       }
+
+      val syncOver = config.get("sync_over").toString match {
+        case "wifi" => 1
+        case _ => 0
+      }
+      spnSyncOver.setSelection(syncOver)
     }
   }
 
