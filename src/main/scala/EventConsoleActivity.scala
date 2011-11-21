@@ -23,7 +23,7 @@ class EventConsoleActivity extends Activity {
   var mHandler = new Handler()
   var dlgShowDetails: Dialog = _
   var adapter = new CustomDeviceErrorListView(this)
-  var expandedIds:List[Long] = List()
+  var expandedDevice:List[String] = List()
   var selectedEvent:Store.Event = _
   var selectedDevice:Store.ZenossDevice = _
   val receiver = new BroadcastReceiver() {
@@ -132,7 +132,7 @@ class EventConsoleActivity extends Activity {
       }
     })
 
-    expandedIds = getExpandedIds 
+    expandedDevice = getExpandedDevice
     dlgShowDetails.show()
   }
 
@@ -147,7 +147,7 @@ class EventConsoleActivity extends Activity {
     listView.setAdapter(adapter)
     ServiceRunner.EventStore.getDevices.foreach( x=> adapter.addItem(x._2) )
     adapter.notifyDataSetChanged()
-    restoreExpandedState(expandedIds)
+    restoreExpandedState(expandedDevice)
     if(ServiceRunner.lastTime != null)
         txtLastTime.setText("Last events fetch: " + ServiceRunner.lastTime.format("%R"))
 
@@ -165,7 +165,7 @@ class EventConsoleActivity extends Activity {
   override def onPause = {
     super.onPause
     unregisterReceiver(receiver)
-    expandedIds = getExpandedIds 
+    expandedDevice = getExpandedDevice
   }
 
   override def onCreateOptionsMenu(menu: Menu): Boolean ={
@@ -199,6 +199,9 @@ class EventConsoleActivity extends Activity {
             ServiceRunner.startService(this, true)
             "Fetching events ..."
           }
+
+        //save opend group view to open them later
+        expandedDevice = getExpandedDevice
         val context = getApplicationContext()
         val toast = Toast.makeText(context, toastMsg , Toast.LENGTH_LONG)
         toast.show()
@@ -264,23 +267,23 @@ class EventConsoleActivity extends Activity {
   }
 
 
-  def getExpandedIds : List[Long] = {
-    var expandedIds:List[Long] = List()
+  def getExpandedDevice : List[String] = {
+    var expandedDevice:List[String] = List()
     if(adapter != null){
-      for(i <- 0 to adapter.getGroupCount){
+      for(i <- 0 to adapter.getGroupCount - 1){
         if(listView.isGroupExpanded(i))
-          expandedIds ::= adapter.getGroupId(i)
+          expandedDevice ::= adapter.getGroup(i).getName
       } 
     }
-    return expandedIds
+    return expandedDevice
   }
 
-  def restoreExpandedState(l: List[Long]) = {
+  def restoreExpandedState(l: List[String]) = {
     if(l != List()){
       if(adapter != null){
-        for(i <- 0 to adapter.getGroupCount){
+        for(i <- 0 to adapter.getGroupCount -1){
           try {
-            val id = adapter.getGroupId(i)
+            val id = adapter.getGroup(i).getName
             if(l.filter(_==id) != List())
               listView.expandGroup(i)
           }catch {

@@ -19,7 +19,7 @@ class CustomDeviceErrorListView (context: Context) extends BaseExpandableListAda
   var devices: List[Store.ZenossDevice] = List()
 
   def addItem(zenDevice: Store.ZenossDevice) = {
-    devices ::= zenDevice
+    devices = devices ::: List(zenDevice)
   }
 
   override def getChild(groupPosition: Int, childPosition: Int) = {
