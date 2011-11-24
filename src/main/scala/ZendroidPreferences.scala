@@ -18,6 +18,11 @@ object ZendroidPreferences {
   val PREFIX_KEY_UPDATE_EVERY = "prefix_updateevery"
   val PREFIX_RUN_ON           = "prefix_syncover"
 
+  def clear(context: Context) = {
+    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
+    prefs.clear
+    prefs.commit
+  }
   // Write the prefix to the SharedPreferences object for this widget
   def savePref(context: Context, url: String, user: String, pass: String, onCritical: Int, onError:Int, onWarning:Int, match_d: String, invalidSSL:Int, updateEvery: Int, syncOver:String) = {
     val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()

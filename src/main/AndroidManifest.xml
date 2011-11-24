@@ -14,6 +14,7 @@ android:versionName="2.1" android:versionCode="210" package="com.github.slashmil
             </intent-filter>
         </activity>
         <activity android:label="About Zenroid" android:name=".MainActivity" />
+        <activity android:label="Zenroid Settings" android:name=".ZenroidSettings"  android:configChanges="keyboardHidden|orientation" />
         <activity android:label="Configuration" android:name=".GlobalConfiguration" />
         <receiver android:name="SmallWidget">
             <intent-filter>

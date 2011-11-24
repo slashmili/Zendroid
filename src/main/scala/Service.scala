@@ -18,7 +18,7 @@ import _root_.android.net.wifi.{WifiManager, WifiInfo}
 
 import com.github.slashmili.Zendroid.utils._
 import ZenossEvents._
-import com.github.slashmili.Zendroid.{R, GlobalConfiguration, ZendroidPreferences, EventConsoleActivity}
+import com.github.slashmili.Zendroid.{R, GlobalConfiguration, ZendroidPreferences, EventConsoleActivity, ZenroidSettings}
 import Store._
 
 object ServiceRunner { 
@@ -71,8 +71,7 @@ object ServiceRunner {
         val intentGlobalConfiguration = new Intent(context, classOf[EventConsoleActivity])
         val pendingIntentGlobalConfiguration = PendingIntent.getActivity(context, 0, intentGlobalConfiguration, 0)
 
-        val zp = ZendroidPreferences.loadPref(context)
-        if (zp == None){
+        if (ZenroidSettings.isEmpty(context) == true){
           val errorRemoteView = new RemoteViews(context.getPackageName(),R.layout.small_widget_error)
           errorRemoteView.setTextViewText(R.id.widgetError,"Click here to configure Zenoss connection")
           errorRemoteView.setOnClickPendingIntent(R.id.widgetError, pendingIntentGlobalConfiguration)
@@ -125,7 +124,7 @@ object ServiceRunner {
         errorText = ServiceRunner.errorMessage
         if(errorText != ""){
           
-          val msg = if(zp.get("update").toString.toInt == 0){
+          val msg = if(ZenroidSettings.getPerformSyncing(context) == false){
             "    Zenroid is disabled    "
           }else {
             var now  = new Time()
@@ -203,11 +202,10 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
           false
 
       //check if it should be worked only over wifi
-      val zp     = ZendroidPreferences.loadPref(this)
       val conMan = getSystemService(Context.CONNECTIVITY_SERVICE).asInstanceOf[ConnectivityManager]
       val mWifi  = conMan.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
       if(runOnce == false
-        && zp.get("sync_over").toString == "wifi"
+        && ZenroidSettings.getSyncoverWIFI(this) == true
         && mWifi.isConnected == false){
            Log.d("Zenroid.Service", "WI-FI connectivity is " + mWifi.isConnected().toString)
            throw new Exception("Zenroid is only available over WI-FI")
@@ -236,14 +234,13 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
   }
 
   def requestLastEvent(context: Context, runOnce: Boolean = false) : Option[Map[String, String]] = {
-    val zp = ZendroidPreferences.loadPref(context)
-    if(zp == None){
+    if(ZenroidSettings.isEmpty(this) == true){
       ServiceRunner.criticalEvent = 0
       ServiceRunner.errorEvent = 0
       ServiceRunner.warninigEvent = 0    
       return Some(Map("severity5" -> "0", "severity4" -> "0", "severity3" -> "0"))
     }
-    if(zp.get("update").toString.toInt == 0 && runOnce == false){
+    if(ZenroidSettings.getPerformSyncing(this) == false && runOnce == false){
       ServiceRunner.errorMessage = "Zenroid is disabled"
       return None
     }
@@ -262,20 +259,16 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
       }
     }
     try {
-      val url  = zp.get("url").toString
-      val user = zp.get("user").toString
-      val pass = zp.get("pass").toString
+      val url  = ZenroidSettings.getZenossURL(this)
+      val user = ZenroidSettings.getZenossUser(this)
+      val pass = ZenroidSettings.getZenossPass(this)
 
-      val invalidSSL = if (zp.get("invalid_ssl").toString == "0"){
-          false
-        } else {
-          true
-      }
+      val invalidSSL = ZenroidSettings.getAcceptInvalidHTTPS(this)
 
       Log.w("Widgets", "Login to Zenoss")
       val zen = new ZenossAPI(url, user, pass, invalidSSL)
       if(zen.auth == false)
-        return None
+        throw new Exception("Wrong username or password")
       val jOpt = zen.eventsQuery
       if (jOpt == None)
         return None
@@ -283,7 +276,7 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
       var severity5 = 0
       var severity4 = 0
       var severity3 = 0
-      val match_d = zp.get("match").toString
+      val match_d = ZenroidSettings.getMatchDevice(this)
       if(jEvent.has("result") && jEvent.getJSONObject("result").has("events")){
         val events = jEvent.getJSONObject("result").getJSONArray("events")
         ServiceRunner.EventStore.cleanDevices
@@ -357,7 +350,7 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
         //set new alarm
         ServiceRunner.alarmManager = getSystemService(Context.ALARM_SERVICE).asInstanceOf[AlarmManager]
         ServiceRunner.nextTime = new Time()
-        val updateEvery = zp.get("update").toString.toInt
+        val updateEvery = ZenroidSettings.getSyncingInterval(this)
         ServiceRunner.nextTime.set(System.currentTimeMillis() + updateEvery)
         val nextUpdate = ServiceRunner.nextTime.toMillis(false)
         ServiceRunner.alarmManager.set(AlarmManager.RTC_WAKEUP, nextUpdate, pendingIntent)
@@ -368,12 +361,11 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
   }
 
   def showNotification (eventId: String,hostname: String, summary: String, severity: Int ) = {
-    val zp = ZendroidPreferences.loadPref(this)
-    if ( zp != None){
+    if (ZenroidSettings.isEmpty(this) == false){
       var notificationState = severity match {
-        case 5 => zp.get("on_critical").toString.toInt
-        case 4 => zp.get("on_error").toString.toInt
-        case 3 => zp.get("on_warning").toString.toInt
+        case 5 => ZenroidSettings.getOnCritical(this)
+        case 4 => ZenroidSettings.getOnError(this)
+        case 3 => ZenroidSettings.getOnWarning(this)
         case _ => 0
       }
       if (notificationState != 0){

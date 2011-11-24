@@ -51,11 +51,14 @@ class EventConsoleActivity extends Activity {
       }
     })
     txtLastTime = findViewById(R.id.txtEventConsoleLastTime).asInstanceOf[TextView]
-    val config = ZendroidPreferences.loadPref(EventConsoleActivity.this)
-      if(config == None){
-        val conf = new Intent(EventConsoleActivity.this, classOf[GlobalConfiguration])
-        startActivity(conf)
-      }
+    if(ZendroidPreferences.loadPref(this) != None){
+      ZenroidSettings.mvOldConfig(this)
+      ZendroidPreferences.clear(this)
+    }
+    if(ZenroidSettings.isEmpty(EventConsoleActivity.this) == true){
+      val conf = new Intent(EventConsoleActivity.this, classOf[ZenroidSettings])
+      startActivity(conf)
+    }
   }
 
   def showDetails(device:Store.ZenossDevice,  event: Store.Event) = {
@@ -170,7 +173,7 @@ class EventConsoleActivity extends Activity {
 
   override def onCreateOptionsMenu(menu: Menu): Boolean ={
     val inflater = getMenuInflater()
-    inflater.inflate(R.menu.config_menu, menu)
+    inflater.inflate(R.menu.event_console_menu, menu)
     return true
   }
 
@@ -188,12 +191,11 @@ class EventConsoleActivity extends Activity {
     item.getItemId match {
       case R.id.mnuLastStatus    => openLastStatusPopup
       case R.id.mnuAccount => {
-        val conf = new Intent(EventConsoleActivity.this, classOf[GlobalConfiguration])
+        val conf = new Intent(EventConsoleActivity.this, classOf[ZenroidSettings])
         startActivity(conf)
       }
       case R.id.mnuRefresh => {
-        val config = ZendroidPreferences.loadPref(EventConsoleActivity.this)
-        val toastMsg = if( config == None || config.get("url").toString == "")
+        val toastMsg = if( ZenroidSettings.isEmpty(EventConsoleActivity.this))
             "First config Zenoss Settings"
           else{
             ServiceRunner.startService(this, true)
@@ -216,14 +218,13 @@ class EventConsoleActivity extends Activity {
 
 
   def openLastStatusPopup() = {
-    val config = ZendroidPreferences.loadPref(EventConsoleActivity.this)
     var lastRunStatus = if (ServiceRunner.started == false){
       "You haven't run Zenroid service yet"
     }
     else if (ServiceRunner.errorMessage == "" ){
       "Clean"
     }
-    else if (config.get("update").toString.toInt == 0){
+    else if (ZenroidSettings.getPerformSyncing(EventConsoleActivity.this) == false){
       "Zenroid is disabled"
     }
     else {
@@ -299,16 +300,11 @@ class EventConsoleActivity extends Activity {
     var result    = false
     var dialog:ProgressDialog = _ 
     override protected def doInBackground1(action: Array[String]): String = {
-      val config = ZendroidPreferences.loadPref(EventConsoleActivity.this)
-      val url  = config.get("url").toString
-      val user = config.get("user").toString
-      val pass = config.get("pass").toString
+      val url  = ZenroidSettings.getZenossURL(EventConsoleActivity.this)
+      val user = ZenroidSettings.getZenossUser(EventConsoleActivity.this)
+      val pass = ZenroidSettings.getZenossPass(EventConsoleActivity.this)
+      val invalidSSL = ZenroidSettings.getAcceptInvalidHTTPS(EventConsoleActivity.this)
 
-      val invalidSSL = if (config.get("invalid_ssl").toString == "0"){
-          false
-        } else {
-          true
-      }
       try {
         val zen = new ZenossAPI(url, user, pass, invalidSSL)
         zen.auth

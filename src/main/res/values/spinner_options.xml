@@ -1,19 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="on_event_choice">
-        <item>Silence</item>
-        <item>Notification </item>
-        <item>Notification + Sound</item>
-        <item>Notification + Sound +  Vibrate</item>
+        <item name="0">Silence</item>
+        <item name="1">Notification </item>
+        <item name="2">Notification + Sound</item>
+        <item name="3">Notification + Sound +  Vibrate</item>
     </string-array>
+    <string-array name="on_event_choice_values">
+        <item name="0">0</item>
+        <item name="1">1</item>
+        <item name="2">2</item>
+        <item name="3">3</item>
+    </string-array>
+
     <string-array name="update_every_choice">
-        <item>Every 5 minutes</item>
-        <item>Every 10 minutes</item>
-        <item>Every 20 minutes</item>
-        <item>Every 30 minutes</item>
-        <item>Every 1 hour</item>
-        <item>Disable</item>
-    </string-array>    
+        <item name="300000">Every 5 minutes</item>
+        <item name="600000">Every 10 minutes</item>
+        <item name="1200000">Every 20 minutes</item>
+        <item name="1800000">Every 30 minutes</item>
+        <item name="3600000">Every 1 hour</item>
+        <item name="0">Dis</item>
+    </string-array>
+    <string-array name="update_every_choice_values">
+        <item name="300000">300000</item>
+        <item name="600000">600000</item>
+        <item name="1200000">1200000</item>
+        <item name="1800000">1800000</item>
+        <item name="0">0</item>
+    </string-array>
     <string-array name="sync_over">
         <item>Mobile Network and WI-FI</item>
         <item>Only WI-FI</item>

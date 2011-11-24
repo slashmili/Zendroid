@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="production_state">
+        <item name="1000">Production</item>
+        <item name="500">Pre-Production</item>
+        <item name="400">Test</item>
+        <item name="300">Maintenance</item>
+        <item name="-1">Decommissioned</item>
+    </string-array>
+    
+    <string-array name="production_state_values">
+        <item name="1000">1000</item>
+        <item name="500">500</item>
+        <item name="400">400</item>
+        <item name="300">300</item>
+        <item name="-1">-1</item>
+    </string-array>
+
+</resources>

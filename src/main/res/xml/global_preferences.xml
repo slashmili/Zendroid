@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory 
+        android:title="Zenoss Setting"
+        android:key="zenoss_setting">
+
+        <EditTextPreference
+            android:key="prefix_url"
+            android:title="Zenoss Url" 
+            android:summary="Define the zenoss URL.\nExmple: https://monitoring.zenoss.org or http://10.10.10.23:8080"
+            android:dialogTitle="Enter Zenoss URL"
+            android:dialogMessage="URL :"    
+            android:inputType="textEmailAddress"
+            android:defaultValue="" />
+
+        <EditTextPreference 
+            android:key="prefix_user"
+            android:title="Zenoss User Account"
+            android:summary="Define your username in Zenoss."
+            android:dialogTitle="Enter Zenoss Account"
+            android:dialogMessage="Username :"
+            android:defaultValue="" />
+
+        <EditTextPreference 
+            android:key="prefix_pass"
+            android:title="Zenoss User Password"
+            android:summary="Define your password in Zenoss."
+            android:dialogTitle="Enter Zenoss Password"
+            android:dialogMessage="password :"
+            android:defaultValue="" 
+            android:password="true"
+            />
+        <CheckBoxPreference 
+            android:key="prefix_invalidhttps"
+            android:summary="Don't check this box if your connection to Zenoss server is under valid HTTPS, this option isn't safe at all!"
+            android:title="Accept Invalid HTTPS"
+            android:defaultValue="false"
+            />
+
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="Monitoring Options"
+        android:key="monitoring_options">
+        <com.github.slashmili.Zendroid.ListPreferenceMultiSelect android:defaultValue="#ALL#"
+            android:key="prefix_state"
+            android:title="Monitoring Production State" 
+            android:summary="Select production state that you want to monitor.\nIf don't check any state it'll monitor all states."
+            android:dialogTitle="Choose Production State"
+            android:entries="@array/production_state"
+            android:entryValues="@array/production_state_values"/>
+
+        <ListPreference 
+            android:key="prefix_oncritical"
+            android:title="On Critical"
+            android:summary="Define action when gets Critical event."
+            android:defaultValue="0" 
+            android:entries="@array/on_event_choice"
+            android:entryValues="@array/on_event_choice_values"
+        />    
+
+        <ListPreference 
+            android:key="prefix_onerror"
+            android:title="On Error"
+            android:summary="Define action when gets Error event."
+            android:defaultValue="0" 
+            android:entries="@array/on_event_choice"
+            android:entryValues="@array/on_event_choice_values"
+        />    
+        <ListPreference 
+            android:key="prefix_onwarning"
+            android:title="On Warning"
+            android:summary="Define action when gets Warning event."
+            android:defaultValue="0" 
+            android:entries="@array/on_event_choice"
+            android:entryValues="@array/on_event_choice_values"
+        />    
+
+        <EditTextPreference
+            android:key="prefix_match"
+            android:title="Match Devices" 
+            android:summary="Define Regex of devices you want to monitor.\nExmple: 'server[1-9].zenoss.org, host[1-9].home.org'\nLeave this filed empty if you want to monitor all devices."
+            android:dialogTitle="Match Only Devices"
+            android:dialogMessage="Pattern :"    
+            android:defaultValue="" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="Syncing Events"
+        android:key="sync_events">
+        <CheckBoxPreference 
+            android:key="prefix_performsyncing"
+            android:summary="Enable or disable syncing events"
+            android:title="Enable Syncing"
+            android:defaultValue="true"
+            />
+
+        <ListPreference 
+            android:key="prefix_syncinginterval"
+            android:title="Syncing interval"
+            android:summary="Define how often syncs events"
+            android:defaultValue="1000" 
+            android:entries="@array/update_every_choice"
+            android:entryValues="@array/update_every_choice_values"
+            android:dependency="prefix_performsyncing"
+        /> 
+
+        <CheckBoxPreference 
+            android:key="prefix_syncoverwifi"
+            android:title="Only uses WI-FI"
+            android:summary="Only Syncs if WI-FI is available."
+            android:defaultValue="false"
+            android:dependency="prefix_performsyncing"
+            />
+    </PreferenceCategory>
+</PreferenceScreen> 
