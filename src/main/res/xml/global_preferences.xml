@@ -99,7 +99,7 @@
             android:key="prefix_syncinginterval"
             android:title="Syncing interval"
             android:summary="Define how often syncs events"
-            android:defaultValue="1000" 
+            android:defaultValue="300000"
             android:entries="@array/update_every_choice"
             android:entryValues="@array/update_every_choice_values"
             android:dependency="prefix_performsyncing"

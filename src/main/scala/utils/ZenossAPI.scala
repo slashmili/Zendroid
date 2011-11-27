@@ -80,8 +80,18 @@ class ZenossEvents (url: String, cookie: String, acceptUntrustedSSL:Boolean = fa
   val action = "EventsRouter"
   val actionType   = "rpc"
   val addrEventConsole = "/zport/dmd/evconsole_router"
-  def eventsQuery : Option[JSONObject] = {
-    val l = """{"action":"EventsRouter","method":"query","data":[{"criteria":[{"prodState":"1000"}],"start":0,"limit":100,"dir":"DESC","sort":"lastTime","params":"{\"severity\":[5,4,3],\"eventState\":[0,1]}"}],"type":"rpc","tid":1}"""
+  def eventsQuery(productStates: List[String]) : Option[JSONObject] = {
+    var prodState = ""
+    val lastVal = productStates.las
+    productStates.foreach( state =>{
+        prodState += """{"prodState":"%s"}""".format(state)
+        if(state != lastVal)
+          prodState += ", "
+      }
+    )
+
+    val l = """{"action":"EventsRouter","method":"query","data":[{"criteria":[%s],"start":0,"limit":100,"dir":"DESC","sort":"lastTime","params":"{\"severity\":[5,4,3],\"eventState\":[0,1]}"}],"type":"rpc","tid":1}""".format(prodState)
+    Log.d("RRRRREQUESTING " + l)
     val res = HttpClient.Json("%s%s".format(url, addrEventConsole), new JSONObject(l), List(("Cookie", cookie)), acceptUntrustedSSL)
     Log.d(res.toString)
     if(res == None)

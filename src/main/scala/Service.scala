@@ -269,7 +269,7 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
       val zen = new ZenossAPI(url, user, pass, invalidSSL)
       if(zen.auth == false)
         throw new Exception("Wrong username or password")
-      val jOpt = zen.eventsQuery
+      val jOpt = zen.eventsQuery(ZenroidSettings.getStates(this))
       if (jOpt == None)
         return None
       val jEvent = jOpt.get
