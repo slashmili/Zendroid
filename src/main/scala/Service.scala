@@ -354,6 +354,7 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
         ServiceRunner.nextTime.set(System.currentTimeMillis() + updateEvery)
         val nextUpdate = ServiceRunner.nextTime.toMillis(false)
         ServiceRunner.alarmManager.set(AlarmManager.RTC_WAKEUP, nextUpdate, pendingIntent)
+        ServiceRunner.started = true
         Log.d("ZenossUpdateService.getLastEvent", " will be called Later (" + ServiceRunner.nextTime.format("%R") + ")")
       }
     }
