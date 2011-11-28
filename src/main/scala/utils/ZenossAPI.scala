@@ -82,7 +82,10 @@ class ZenossEvents (url: String, cookie: String, acceptUntrustedSSL:Boolean = fa
   val addrEventConsole = "/zport/dmd/evconsole_router"
   def eventsQuery(productStates: List[String]) : Option[JSONObject] = {
     var prodState = ""
-    val lastVal = productStates.last
+    val lastVal = if(productStates != List())
+        productStates.last
+      else
+        ""
     productStates.foreach( state =>{
         prodState += """{"prodState":"%s"}""".format(state)
         if(state != lastVal)
