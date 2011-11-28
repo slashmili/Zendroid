@@ -228,7 +228,6 @@ class ZenroidSettings extends PreferenceActivity {
   
   override def onConfigurationChanged(newConfig: res.Configuration){
     super.onConfigurationChanged(newConfig)
-    addPreferencesFromResource(R.xml.global_preferences)
 
   }
   override def onStop = {

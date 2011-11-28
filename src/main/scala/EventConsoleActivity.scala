@@ -3,8 +3,8 @@ package com.github.slashmili.Zendroid
 import _root_.android.app.{Activity, NotificationManager, Dialog}
 import _root_.android.os.{Bundle, Handler}
 import _root_.android.view.View
-import _root_.android.widget.{ExpandableListView, Toast, TextView, ImageView}
-import _root_.android.content.{Intent, Context, IntentFilter, BroadcastReceiver}
+import _root_.android.widget.{ExpandableListView, Toast, TextView, ImageView, ProgressBar}
+import _root_.android.content.{res, Intent, Context, IntentFilter, BroadcastReceiver}
 import _root_.com.github.slashmili.Zendroid.Services.ServiceRunner
 import _root_.com.github.slashmili.Zendroid.Services._
 import _root_.android.util.Log
@@ -26,6 +26,8 @@ class EventConsoleActivity extends Activity {
   var expandedDevice:List[String] = List()
   var selectedEvent:Store.Event = _
   var selectedDevice:Store.ZenossDevice = _
+  var pgbEventConsoleLastWaiting: ProgressBar = _
+
   val receiver = new BroadcastReceiver() {
     override def onReceive(context: Context, intent:Intent) ={
       refreshActivity
@@ -37,8 +39,10 @@ class EventConsoleActivity extends Activity {
 
     setTitle("Event Console")
     setContentView(R.layout.event_console)
-    listView = findViewById(R.id.deviceErrorListView).asInstanceOf[ExpandableListView]
 
+    pgbEventConsoleLastWaiting = findViewById(R.id.pgbEventConsoleLastWaiting).asInstanceOf[ProgressBar]
+
+    listView = findViewById(R.id.deviceErrorListView).asInstanceOf[ExpandableListView]
     listView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
         def onChildClick(parent: ExpandableListView , v: View , groupPosition: Int , childPosition: Int, id: Long): Boolean = {
         val event = adapter.getChild(groupPosition, childPosition).asInstanceOf[Store.Event]
@@ -146,6 +150,7 @@ class EventConsoleActivity extends Activity {
   }
 
   def refreshActivity = {
+    pgbEventConsoleLastWaiting.setVisibility(View.GONE)
     adapter = new CustomDeviceErrorListView(EventConsoleActivity.this)
     listView.setAdapter(adapter)
     ServiceRunner.EventStore.getDevices.foreach( x=> adapter.addItem(x._2) )
@@ -163,6 +168,10 @@ class EventConsoleActivity extends Activity {
     registerReceiver(receiver, filter)
     refreshActivity
     clearNotification
+  }
+
+  override def onConfigurationChanged(newConfig: res.Configuration){
+    super.onConfigurationChanged(newConfig)
   }
 
   override def onPause = {
@@ -198,6 +207,7 @@ class EventConsoleActivity extends Activity {
         val toastMsg = if( ZenroidSettings.isEmpty(EventConsoleActivity.this))
             "First config Zenoss Settings"
           else{
+            pgbEventConsoleLastWaiting.setVisibility(View.VISIBLE)
             ServiceRunner.startService(this, true)
             "Fetching events ..."
           }

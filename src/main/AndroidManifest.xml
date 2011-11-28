@@ -6,7 +6,7 @@ android:versionName="2.1" android:versionCode="210" package="com.github.slashmil
     <uses-permission  android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-sdk android:minSdkVersion="8"></uses-sdk>
     <application android:icon="@drawable/zendroid_icon" android:label="Zenroid">
-        <activity android:label="Zenroid" android:name=".EventConsoleActivity">
+        <activity android:label="Zenroid" android:name=".EventConsoleActivity" android:configChanges="keyboardHidden|orientation" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.LAUNCHER"></category>
