@@ -2,17 +2,32 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="fill_parent"
     android:layout_height="fill_parent">
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/txtEventConsoleLastTime"
-        android:layout_gravity="center"
-        android:gravity="left"
-        android:textStyle="bold"
-        android:paddingTop="1dip"
-        android:text="Last update: Never">
-    </TextView>
 
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_gravity="center">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/txtEventConsoleLastTime"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:paddingTop="1dip"
+            android:text="Last update: Never">
+        </TextView>
+
+        <ProgressBar
+            android:id="@+id/pgbEventConsoleLastWaiting"
+            android:layout_gravity="center"
+            android:layout_height="25px"
+            android:layout_width="25px"
+            android:layout_x="-1px"
+            android:layout_y="0px"/>
+    </LinearLayout>
     <ExpandableListView android:id="@+id/deviceErrorListView"
         android:layout_width="fill_parent" android:layout_height="fill_parent" android:scrollbars="none"></ExpandableListView>
 </LinearLayout>
