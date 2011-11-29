@@ -47,14 +47,14 @@
             android:key="prefix_state"
             android:title="Monitoring Production State" 
             android:summary="Select production state that you want to monitor.\nIf don't check any state it'll monitor all states."
-            android:dialogTitle="Choose Production State"
+            android:dialogTitle="Choose Production States"
             android:entries="@array/production_state"
             android:entryValues="@array/production_state_values"/>
 
         <ListPreference 
             android:key="prefix_oncritical"
             android:title="On Critical"
-            android:summary="Define action when gets Critical event."
+            android:summary="Define action when gets critical event."
             android:defaultValue="0" 
             android:entries="@array/on_event_choice"
             android:entryValues="@array/on_event_choice_values"
@@ -63,7 +63,7 @@
         <ListPreference 
             android:key="prefix_onerror"
             android:title="On Error"
-            android:summary="Define action when gets Error event."
+            android:summary="Define action when gets error event."
             android:defaultValue="0" 
             android:entries="@array/on_event_choice"
             android:entryValues="@array/on_event_choice_values"
@@ -71,7 +71,7 @@
         <ListPreference 
             android:key="prefix_onwarning"
             android:title="On Warning"
-            android:summary="Define action when gets Warning event."
+            android:summary="Define action when gets warning event."
             android:defaultValue="0" 
             android:entries="@array/on_event_choice"
             android:entryValues="@array/on_event_choice_values"

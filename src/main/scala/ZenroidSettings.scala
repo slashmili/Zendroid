@@ -234,7 +234,7 @@ class ZenroidSettings extends PreferenceActivity {
     val context = getApplicationContext()
     val toastMessage = if(isDiscard == true){
       revertPreferences
-      "Reverting settings back"
+      "Setting is reverted"
     }else if (saveSettingsCheck == true){
       "Setting is saved"
     }else if(isRemoved == true){
