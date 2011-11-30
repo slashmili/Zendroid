@@ -43,7 +43,7 @@ object ZenroidSettings {
  
     sp.putString(ZenroidSettings.PREFIX_KEY_URL, oldConf.get("url").toString)
     sp.putString(ZenroidSettings.PREFIX_KEY_USER, oldConf.get("user").toString)
-    sp.putString(ZenroidSettings.PREFIX_KEY_PASS, oldConf.get("pass").toString)
+    ZenroidSettings.encryptZenossPass(context, oldConf.get("pass").toString)
     sp.putBoolean(ZenroidSettings.PREFIX_KEY_INVALID_HTTPS, if(oldConf.get("invalid_ssl").toString.toInt == 0) false else true)
     sp.putString(ZenroidSettings.PREFIX_KEY_STATE, "")
     sp.putString(ZenroidSettings.PREFIX_KEY_ON_CRITICAL, oldConf.get("on_critical").toString)

@@ -19,14 +19,12 @@
         <item name="1200000">Every 20 minutes</item>
         <item name="1800000">Every 30 minutes</item>
         <item name="3600000">Every 1 hour</item>
-        <item name="0">Dis</item>
     </string-array>
     <string-array name="update_every_choice_values">
         <item name="300000">300000</item>
         <item name="600000">600000</item>
         <item name="1200000">1200000</item>
         <item name="1800000">1800000</item>
-        <item name="0">0</item>
     </string-array>
     <string-array name="sync_over">
         <item>Mobile Network and WI-FI</item>
