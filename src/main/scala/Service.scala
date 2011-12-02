@@ -280,6 +280,8 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
       if(jEvent.has("result") && jEvent.getJSONObject("result").has("events")){
         val events = jEvent.getJSONObject("result").getJSONArray("events")
         ServiceRunner.EventStore.cleanDevices
+        val oldEventIds = ServiceRunner.EventStore.eventIDs
+        var fetchedEventIds:List[String] = List()
         for(i <- 0 to  events.length -1 ){
           val JO = new JSONObject( events.get(i).toString)
           //val JO = events.get(i).asInstanceOf[JSONObject]
@@ -307,6 +309,7 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
               JO.getJSONObject("component").getString("text")
             else
               ""
+          fetchedEventIds ::= eventId
           if(JO.has("device") && JO.getJSONObject("device").has("text")){
             if(match_d == "") {
               if(JO.has("severity")){
@@ -340,6 +343,7 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
         ServiceRunner.warninigEvent = severity3
         Log.d("ZenossUpdateService.getLastEvent", "severity5: " + severity5.toString + " | severity4: " + severity4.toString + " | severity3: " + severity3.toString)
         ServiceRunner.lastTime.set(System.currentTimeMillis())
+        clearOldNotification(fetchedEventIds, oldEventIds)
         return Some(Map("severity5" -> severity5.toString, "severity4" -> severity4.toString, "severity3" -> severity3.toString))
       }
 
@@ -361,6 +365,11 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
     return None
   }
 
+  def clearOldNotification(newEventIds: List[String], oldEventIds : List[String]) = {
+    oldEventIds.diff(newEventIds).foreach(
+      getSystemService(Context.NOTIFICATION_SERVICE).asInstanceOf[NotificationManager].cancel(_, 0)
+    )
+  }
   def showNotification (eventId: String,hostname: String, summary: String, severity: Int ) = {
     if (ZenroidSettings.isEmpty(this) == false){
       var notificationState = severity match {
