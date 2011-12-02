@@ -7,9 +7,8 @@ import _root_.android.content.{Intent, res, DialogInterface, Context, SharedPref
 import _root_.android.net.Uri
 import _root_.android.preference.{PreferenceActivity, PreferenceManager, EditTextPreference}
 import _root_.android.app.{Activity, ProgressDialog, AlertDialog}
+
 import _root_.com.androidsnippets.SimpleCrypto
-
-
 import com.github.slashmili.Zendroid.Services.{ZenossUpdateService, ServiceRunner}
 import com.github.slashmili.Zendroid.utils._
 import ZenossEvents._
@@ -167,6 +166,42 @@ class ZenroidSettings extends PreferenceActivity {
   }
 
 
+  override def onBackPressed = {
+    val newZenossURL  = ZenroidSettings.getZenossURL(this)
+    val newZenossUser = ZenroidSettings.getZenossUser(this)
+    val newZenossPass = ZenroidSettings.getZenossPassRaw(this)
+    val newSyncing    = ZenroidSettings.getPerformSyncing(this)
+    val newAcceptInvalidHTTPS = ZenroidSettings.getAcceptInvalidHTTPS(this)
+
+    if(newZenossURL          != zenossURL ||
+       newZenossUser         != zenossUser ||
+       newZenossPass         != zenossPass ||
+       newSyncing            != syncing ||
+       newAcceptInvalidHTTPS != acceptInvalidHTTPS ){
+
+        new AlertDialog.Builder(ZenroidSettings.this)
+        .setTitle("Settings have been changed")
+        .setMessage("Do you want to save new settings ?")
+        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+            def onClick(dialog: DialogInterface, which:Int) ={
+              dialog.cancel
+              isDiscard = true
+              finish
+            }
+          })
+        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            def onClick(dialog: DialogInterface, which:Int) ={
+              dialog.cancel
+              tryToSaveSettings
+            }
+          })
+          .show()
+    }else {
+      tryToSaveSettings
+      finish
+    }
+
+  }
   override def onCreateOptionsMenu(menu: Menu): Boolean ={
     val inflater = getMenuInflater()
     inflater.inflate(R.menu.settings_menu, menu)
@@ -177,27 +212,31 @@ class ZenroidSettings extends PreferenceActivity {
     return true
   }
 
+  def tryToSaveSettings = { 
+    val newZenossURL  = ZenroidSettings.getZenossURL(this)
+    val newZenossUser = ZenroidSettings.getZenossUser(this)
+    var newZenossPass = ZenroidSettings.getZenossPass(this)
+    if(newZenossPass == ""){
+      newZenossPass = ZenroidSettings.getZenossPassRaw(this)
+    }
+    val newAcceptInvalidHTTPS = if(ZenroidSettings.getAcceptInvalidHTTPS(this) == false)
+        "0"
+      else 
+        "1"
+    saveSettingsCheck = false
+    if(newZenossURL == zenossURL && newZenossUser == zenossUser && ZenroidSettings.getZenossPass(this) != "" && 
+      ZenroidSettings.getAcceptInvalidHTTPS(this) == acceptInvalidHTTPS){
+      saveSettingsCheck = true
+      runAndExit
+    }else {
+      new CheckSettings().execute(newZenossURL, newZenossUser, newZenossPass , newAcceptInvalidHTTPS)
+    }
+  }
+
   override def onOptionsItemSelected(item: MenuItem): Boolean ={
     item.getItemId match {
       case R.id.mnuSave    => {
-        val newZenossURL  = ZenroidSettings.getZenossURL(this)
-        val newZenossUser = ZenroidSettings.getZenossUser(this)
-        var newZenossPass = ZenroidSettings.getZenossPass(this)
-        if(newZenossPass == ""){
-          newZenossPass = ZenroidSettings.getZenossPassRaw(this)
-        }
-        val newAcceptInvalidHTTPS = if(ZenroidSettings.getAcceptInvalidHTTPS(this) == false)
-            "0"
-          else 
-            "1"
-        saveSettingsCheck = false
-        if(newZenossURL == zenossURL && newZenossUser == zenossUser && ZenroidSettings.getZenossPass(this) != "" && 
-          ZenroidSettings.getAcceptInvalidHTTPS(this) == acceptInvalidHTTPS){
-          saveSettingsCheck = true
-          runAndExit
-        }else {
-          new CheckSettings().execute(newZenossURL, newZenossUser, newZenossPass , newAcceptInvalidHTTPS)
-        }
+        tryToSaveSettings
       }
       case R.id.mnuDiscard => {isDiscard = true ; finish }
       case R.id.mnuRemoveAccount=> { 
@@ -234,7 +273,7 @@ class ZenroidSettings extends PreferenceActivity {
     val context = getApplicationContext()
     val toastMessage = if(isDiscard == true){
       revertPreferences
-      "Setting is reverted"
+      ""
     }else if (saveSettingsCheck == true){
       "Setting is saved"
     }else if(isRemoved == true){
@@ -243,9 +282,10 @@ class ZenroidSettings extends PreferenceActivity {
       revertPreferences
       "Settings isn't saved, you need to press menu and save the settings"
     }
-
-    val toast = Toast.makeText(context, toastMessage , Toast.LENGTH_SHORT)
-    toast.show
+    if(toastMessage != ""){
+      val toast = Toast.makeText(context, toastMessage , Toast.LENGTH_SHORT)
+      toast.show
+    }
 
     super.onStop
   }
