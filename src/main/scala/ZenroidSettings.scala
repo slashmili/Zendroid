@@ -87,8 +87,19 @@ object ZenroidSettings {
   def getOnCritical(context: Context) = prefs(context).getString(ZenroidSettings.PREFIX_KEY_ON_CRITICAL, "0").toInt
   def getOnError(context: Context) = prefs(context).getString(ZenroidSettings.PREFIX_KEY_ON_ERROR, "0").toInt
   def getOnWarning(context: Context) = prefs(context).getString(ZenroidSettings.PREFIX_KEY_ON_WARNING, "0").toInt
+
+  def fixbug44(context: Context) = {
+    val  sp=PreferenceManager.getDefaultSharedPreferences(context).edit
+    sp.putString(ZenroidSettings.PREFIX_KEY_STATE, "")
+    sp.commit
+  }
   def getStates(context: Context): List[String] = {
+
     val v = prefs(context).getString(ZenroidSettings.PREFIX_KEY_STATE, "")
+    if(v == "#ALL#"){
+        fixbug44(context)
+        return List()
+    }
     if(v.split("::").toList == List(""))
       List()
     else 
