@@ -43,7 +43,7 @@
     <PreferenceCategory
         android:title="Monitoring Options"
         android:key="monitoring_options">
-        <com.github.slashmili.Zendroid.ListPreferenceMultiSelect android:defaultValue="#ALL#"
+        <com.github.slashmili.Zendroid.ListPreferenceMultiSelect android:defaultValue=""
             android:key="prefix_state"
             android:title="Monitoring Production State" 
             android:summary="Select production state that you want to monitor.\nIf don't check any state it'll monitor all states."
