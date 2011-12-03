@@ -81,15 +81,22 @@ object ServiceRunner {
         var errorText = ""
         var events: Option[Map[String, String]] = None
         events = getLastEvent()
+        def getRoundBackground(mainBackground: Int, patchedBackground: Int) = {
+          //fore more info see http://code.google.com/p/android/issues/detail?id=9161
+          if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+            mainBackground
+          else
+            patchedBackground
+        }
         val remoteView = new RemoteViews(context.getPackageName(),R.layout.small_widget )
         if(events != None)
         {
           if(events.get("severity5") == "0"){
             remoteView.setInt(R.id.severity5Img, "setAlpha", 100)
-            remoteView.setInt(R.id.severity5Box, "setBackgroundResource", R.drawable.severity5_background_noevent);
+            remoteView.setInt(R.id.severity5Box, "setBackgroundResource", getRoundBackground(R.drawable.severity5_background_noevent, R.drawable.severity5_background_noevent_patch))
           }else {
             remoteView.setInt(R.id.severity5Img, "setAlpha", 255)
-            remoteView.setInt(R.id.severity5Box, "setBackgroundResource", R.drawable.severity5_background);
+            remoteView.setInt(R.id.severity5Box, "setBackgroundResource", getRoundBackground(R.drawable.severity5_background, R.drawable.severity5_background_patch))
           }
           remoteView.setTextViewText(R.id.severity5, events.get("severity5"))
           remoteView.setOnClickPendingIntent(R.id.severity5, pendingIntentGlobalConfiguration)
@@ -97,10 +104,10 @@ object ServiceRunner {
 
           if(events.get("severity4") == "0"){
             remoteView.setInt(R.id.severity4Img, "setAlpha", 100)
-            remoteView.setInt(R.id.severity4Box, "setBackgroundResource", R.drawable.severity4_background_noevent);
+            remoteView.setInt(R.id.severity4Box, "setBackgroundResource", R.drawable.severity4_background_noevent)
           }else {
             remoteView.setInt(R.id.severity4Img, "setAlpha", 255)
-            remoteView.setInt(R.id.severity4Box, "setBackgroundResource", R.drawable.severity4_background);
+            remoteView.setInt(R.id.severity4Box, "setBackgroundResource", R.drawable.severity4_background)
           }
           remoteView.setTextViewText(R.id.severity4, events.get("severity4"))
           remoteView.setOnClickPendingIntent(R.id.severity4, pendingIntentGlobalConfiguration)
@@ -108,10 +115,10 @@ object ServiceRunner {
 
           if(events.get("severity3") == "0"){
             remoteView.setInt(R.id.severity3Img, "setAlpha", 100)
-            remoteView.setInt(R.id.severity3Box, "setBackgroundResource", R.drawable.severity3_background_noevent);
+            remoteView.setInt(R.id.severity3Box, "setBackgroundResource", getRoundBackground(R.drawable.severity3_background_noevent, R.drawable.severity3_background_noevent_patch))
           }else {
             remoteView.setInt(R.id.severity3Img, "setAlpha", 255)
-            remoteView.setInt(R.id.severity3Box, "setBackgroundResource", R.drawable.severity3_background);
+            remoteView.setInt(R.id.severity3Box, "setBackgroundResource", getRoundBackground(R.drawable.severity3_background, R.drawable.severity3_background_patch))
           }
           remoteView.setTextViewText(R.id.severity3, events.get("severity3"))
           remoteView.setOnClickPendingIntent(R.id.severity3, pendingIntentGlobalConfiguration)
