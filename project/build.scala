@@ -6,7 +6,7 @@ import AndroidKeys._
 object General {
   val settings = Defaults.defaultSettings ++ Seq (
     name := "Zenroid",
-    version := "2.2",
+    version := "2.25",
     scalaVersion := "2.9.0-1",
     platformName in Android := "android-14"
   )
