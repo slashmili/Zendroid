@@ -122,7 +122,7 @@
         android:id="@+id/widgetError"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="10sp"
+        android:textSize="10px"
         android:textColor="#000000" 
         android:background="#a6a6a6"
         android:text="Loading Zenroid configuration"
