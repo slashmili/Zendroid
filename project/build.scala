@@ -8,7 +8,7 @@ object General {
     name := "Zenroid",
     version := "2.2",
     scalaVersion := "2.9.0-1",
-    platformName in Android := "android-8"
+    platformName in Android := "android-14"
   )
 
   lazy val fullAndroidSettings =
@@ -16,7 +16,7 @@ object General {
     AndroidProject.androidSettings ++
     TypedResources.settings ++
     AndroidMarketPublish.settings ++ Seq (
-      keyalias in Android := "change-me",
+      keyalias in Android := "Zendroid",
       libraryDependencies += "org.scalatest" %% "scalatest" % "1.6.1" % "test"
     )
 }
