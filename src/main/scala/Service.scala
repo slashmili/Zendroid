@@ -21,12 +21,12 @@ import ZenossEvents._
 import com.github.slashmili.Zendroid.{R, GlobalConfiguration, ZendroidPreferences, EventConsoleActivity, ZenroidSettings}
 import Store._
 
-object ServiceRunner { 
+object ServiceRunner {
   var alarmManager:AlarmManager = _
   var service:ZenossUpdateService = _
   var lastThrowableError:java.lang.Throwable = _
   var criticalEvent = 0
-  var errorEvent    = 0 
+  var errorEvent    = 0
   var warninigEvent = 0
   var errorMessage = ""
   var started      = false
@@ -130,7 +130,7 @@ object ServiceRunner {
 
         errorText = ServiceRunner.errorMessage
         if(errorText != ""){
-          
+
           val msg = if(ZenroidSettings.getPerformSyncing(context) == false){
             "    Zenroid is disabled    "
           }else {
@@ -235,16 +235,12 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
         appWidgetManager.updateAppWidget(_, updateViews)
     }
   }
-  
-  def getLastEvent() : Option[Map[String, String]] = {
-    return Some(Map("severity5" -> ServiceRunner.criticalEvent.toString, "severity4" -> ServiceRunner.errorEvent.toString, "severity3" -> ServiceRunner.warninigEvent.toString))
-  }
 
   def requestLastEvent(context: Context, runOnce: Boolean = false) : Option[Map[String, String]] = {
     if(ZenroidSettings.isEmpty(this) == true){
       ServiceRunner.criticalEvent = 0
       ServiceRunner.errorEvent = 0
-      ServiceRunner.warninigEvent = 0    
+      ServiceRunner.warninigEvent = 0
       return Some(Map("severity5" -> "0", "severity4" -> "0", "severity3" -> "0"))
     }
     if(ZenroidSettings.getPerformSyncing(this) == false && runOnce == false){

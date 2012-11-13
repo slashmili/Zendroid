@@ -5,6 +5,7 @@ package="com.github.slashmili.Zendroid" xmlns:android="http://schemas.android.co
     <uses-permission  android:name="android.permission.FLASHLIGHT" />
     <uses-permission  android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-sdk android:minSdkVersion="8"></uses-sdk>
+    <supports-screens android:xlargeScreens="true" />
     <application android:icon="@drawable/zendroid_icon" android:label="Zenroid">
         <activity android:label="Zenroid" android:name=".EventConsoleActivity" android:configChanges="keyboardHidden|orientation" >
             <intent-filter>

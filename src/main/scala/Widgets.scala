@@ -14,17 +14,10 @@ class SmallWidget extends AppWidgetProvider {
 
     if(ServiceRunner.started == false) {
       ServiceRunner.startService(context)
-      Log.d("Widget-Zendroid","Service is not running -----------------")
     }else {
-      Log.d("Widget-Zendroid","Service is running     +++++++++++++++++")
-
       val remoteView = ServiceRunner.WdigetStore.updateWidget(context)
       appWidgetIds.foreach (appWidgetManager.updateAppWidget(_, remoteView))
     }
-  }
-
-  override def onReceive(context: Context, intent: Intent) ={
-    super.onReceive(context, intent)
   }
 
   override def onDeleted(context: Context, appWidgetIds: Array[Int]) = {
