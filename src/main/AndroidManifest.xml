@@ -7,17 +7,17 @@ package="com.github.slashmili.Zendroid" xmlns:android="http://schemas.android.co
     <uses-sdk android:minSdkVersion="8"></uses-sdk>
     <supports-screens android:xlargeScreens="true" />
     <application android:icon="@drawable/zendroid_icon" android:label="Zenroid">
-        <activity android:label="Zenroid" android:name=".EventConsoleActivity" android:configChanges="keyboardHidden|orientation" >
+        <activity android:label="Zenroid" android:name=".activities.EventConsoleActivity" android:configChanges="keyboardHidden|orientation" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.LAUNCHER"></category>
                 <action android:name="com.github.slashmili.Zendroid.REFRESHACTIVITY"></action>
             </intent-filter>
         </activity>
-        <activity android:label="About Zenroid" android:name=".MainActivity" />
-        <activity android:label="Zenroid Settings" android:name=".ZenroidSettings"  android:configChanges="keyboardHidden|orientation" />
-        <activity android:label="Configuration" android:name=".GlobalConfiguration" />
-        <receiver android:name="SmallWidget">
+        <activity android:label="About Zenroid" android:name=".activities.About" />
+        <activity android:label="Zenroid Settings" android:name=".settings.ZenroidSettings"  android:configChanges="keyboardHidden|orientation" />
+        <activity android:label="Configuration" android:name=".activities.GlobalConfiguration" />
+        <receiver android:name=".widgets.SmallWidget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>

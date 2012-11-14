@@ -1,26 +1,28 @@
-package com.github.slashmili.Zendroid
+package com.github.slashmili.Zendroid.activities
 
 import _root_.android.app.{Activity, NotificationManager, Dialog}
 import _root_.android.os.{Bundle, Handler}
-import _root_.android.view.View
 import _root_.android.widget.{ExpandableListView, Toast, TextView, ImageView, ProgressBar}
 import _root_.android.content.{res, Intent, Context, IntentFilter, BroadcastReceiver}
-import _root_.com.github.slashmili.Zendroid.Services.ServiceRunner
-import _root_.com.github.slashmili.Zendroid.Services._
 import _root_.android.util.Log
 import _root_.android.view.{View, Menu, MenuItem}
 import _root_.android.app.{ProgressDialog, AlertDialog}
 import _root_.android.content.DialogInterface
 import _root_.android.text.format.Time
 import _root_.android.content.DialogInterface.OnDismissListener
-import utils.CustomDeviceErrorListView
-import com.github.slashmili.Zendroid.utils.{ZenossAPI, ZenossEvents}
-import ZenossEvents._
+
+
+
+import com.github.slashmili.Zendroid._
+import Services.ServiceRunner
+import Services.Store
+import utils.{ZenossAPI, CustomDeviceErrorListView}
+import utils.ZenossEvents._
+import settings.{ZendroidPreferences, ZenroidSettings}
 
 class EventConsoleActivity extends Activity {
   var listView: ExpandableListView = _
   var txtLastTime: TextView  = _
-  var mHandler = new Handler()
   var dlgShowDetails: Dialog = _
   var adapter = new CustomDeviceErrorListView(this)
   var expandedDevice:List[String] = List()
@@ -34,15 +36,19 @@ class EventConsoleActivity extends Activity {
     }
   }
 
+  def attachViews() {
+    listView = findViewById(R.id.deviceErrorListView).asInstanceOf[ExpandableListView]
+    pgbEventConsoleLastWaiting = findViewById(R.id.pgbEventConsoleLastWaiting).asInstanceOf[ProgressBar]
+    txtLastTime = findViewById(R.id.txtEventConsoleLastTime).asInstanceOf[TextView]
+  }
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
 
     setTitle("Event Console")
     setContentView(R.layout.event_console)
 
-    pgbEventConsoleLastWaiting = findViewById(R.id.pgbEventConsoleLastWaiting).asInstanceOf[ProgressBar]
+    attachViews
 
-    listView = findViewById(R.id.deviceErrorListView).asInstanceOf[ExpandableListView]
     listView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
         def onChildClick(parent: ExpandableListView , v: View , groupPosition: Int , childPosition: Int, id: Long): Boolean = {
         val event = adapter.getChild(groupPosition, childPosition).asInstanceOf[Store.Event]
@@ -54,7 +60,7 @@ class EventConsoleActivity extends Activity {
         true
       }
     })
-    txtLastTime = findViewById(R.id.txtEventConsoleLastTime).asInstanceOf[TextView]
+
     if(ZendroidPreferences.loadPref(this) != None){
       ZenroidSettings.mvOldConfig(this)
       ZendroidPreferences.clear(this)
@@ -95,7 +101,7 @@ class EventConsoleActivity extends Activity {
     val imgEventDetailSeverityIcon = dlgShowDetails.findViewById(R.id.imgEventDetailSeverityIcon).asInstanceOf[ImageView]
     imgEventDetailSeverityIcon.setImageResource(icon)
 
-    def prompt(header: String, body:String, action: String,evid: String, eventState: String) = { 
+    def prompt(header: String, body:String, action: String,evid: String, eventState: String) = {
       new AlertDialog.Builder(EventConsoleActivity.this)
       .setTitle(header)
       .setMessage(body)
@@ -132,7 +138,7 @@ class EventConsoleActivity extends Activity {
         prompt("Sending Close event", "Do you want to send Close request to server ?", "Close", event.getEvID, event.getEventState)
      }
     })
-    
+
     dlgShowDetails.setOnDismissListener(new OnDismissListener() {
       override def onDismiss(dialog: DialogInterface) = {
         refreshActivity
@@ -160,7 +166,7 @@ class EventConsoleActivity extends Activity {
         txtLastTime.setText("Last events fetch: " + ServiceRunner.lastTime.format("%R"))
 
   }
-  
+
   override def onResume = {
     super.onResume
     val filter = new IntentFilter
@@ -219,7 +225,7 @@ class EventConsoleActivity extends Activity {
         toast.show()
       }
       case R.id.mnuAbout         => {
-        val about = new Intent(EventConsoleActivity.this, classOf[MainActivity])
+        val about = new Intent(EventConsoleActivity.this, classOf[About])
         startActivity(about)
       }
     }
@@ -244,9 +250,9 @@ class EventConsoleActivity extends Activity {
         case _ => ServiceRunner.errorMessage
       }
     }
-    lastRunStatus = "Last Error: " + lastRunStatus
+    lastRunStatus = "Last Status : " + lastRunStatus
     new AlertDialog.Builder(EventConsoleActivity.this)
-    .setTitle("Last Status")
+    .setTitle("Status")
     .setMessage("Next Update: " + ServiceRunner.nextTime.format("%R") + "\n" + lastRunStatus)
     .setNegativeButton("Close", new DialogInterface.OnClickListener() {
         def onClick(dialog: DialogInterface, which:Int) ={
@@ -257,8 +263,8 @@ class EventConsoleActivity extends Activity {
         def onClick(dialog: DialogInterface, which:Int)= {
            if (ServiceRunner.lastThrowableError != null ){
              var stackTrace = "Exception : " + ServiceRunner.lastThrowableError.toString + "\n"
-             for (e <- ServiceRunner.lastThrowableError.getStackTrace){ 
-               stackTrace = stackTrace + e.toString + "\n" 
+             for (e <- ServiceRunner.lastThrowableError.getStackTrace){
+               stackTrace = stackTrace + e.toString + "\n"
              }
              val emailIntent = new Intent(Intent.ACTION_SEND)
              emailIntent.setType("plain/text")
@@ -284,7 +290,7 @@ class EventConsoleActivity extends Activity {
       for(i <- 0 to adapter.getGroupCount - 1){
         if(listView.isGroupExpanded(i))
           expandedDevice ::= adapter.getGroup(i).getName
-      } 
+      }
     }
     return expandedDevice
   }
@@ -308,7 +314,7 @@ class EventConsoleActivity extends Activity {
   private class SendEventRequest extends MyAsyncTask {
     var exMessage = ""
     var result    = false
-    var dialog:ProgressDialog = _ 
+    var dialog:ProgressDialog = _
     override protected def doInBackground1(action: Array[String]): String = {
       val url  = ZenroidSettings.getZenossURL(EventConsoleActivity.this)
       val user = ZenroidSettings.getZenossUser(EventConsoleActivity.this)

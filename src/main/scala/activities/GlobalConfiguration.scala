@@ -1,20 +1,21 @@
-package com.github.slashmili.Zendroid
+package com.github.slashmili.Zendroid.activities
 
 
 import _root_.android.app.Activity
 import _root_.android.os.Bundle
-import _root_.android.view.{View, Menu, MenuItem}
-import _root_.android.widget.{EditText, TextView, Button, Spinner, ArrayAdapter, AdapterView, Toast, CheckBox}
-import _root_.android.content.Intent;
+import _root_.android.view.View
+import _root_.android.widget.{EditText, Spinner, ArrayAdapter, AdapterView, Toast, CheckBox}
 import _root_.android.widget.AdapterView.OnItemSelectedListener
-import _root_.android.appwidget.AppWidgetManager
 import _root_.android.app.{ProgressDialog, AlertDialog}
 import _root_.android.content.DialogInterface
 import _root_.android.util.Log
 
-import com.github.slashmili.Zendroid.Services.{ZenossUpdateService, ServiceRunner}
-import com.github.slashmili.Zendroid.utils._
-import ZenossEvents._
+
+import com.github.slashmili.Zendroid._
+import Services.ServiceRunner
+import utils.ZenossEvents._
+import utils.ZenossAPI
+import settings.ZendroidPreferences
 
 
 
@@ -57,23 +58,11 @@ class GlobalConfiguration extends Activity  {
   var onWarning:Int  = Alarm.ALARM_WITH_NOTIFICATION_AND_SOUND
   var syncOver       = "always"
   var saveSettingsCheck = false
-  var finishedSavingProcess = false 
+  var finishedSavingProcess = false
   var errorMessage = ""
 
-  override def onCreate(savedInstanceState: Bundle) {
-    super.onCreate(savedInstanceState)
-
-    setContentView(R.layout.global_configuration)
-    findViewById(R.id.btnSaveSettings).setOnClickListener(btnSaveSettingsOnClickListener)
-    findViewById(R.id.btnDeleteAccount).setOnClickListener(btnRemoveAccountOnClickListener)
-    //config texts
-    txtZenossURL   =  findViewById(R.id.txtZenossURL).asInstanceOf[EditText]
-    txtZenossUser  =  findViewById(R.id.txtZenossUser).asInstanceOf[EditText]
-    txtZenossPass  =  findViewById(R.id.txtZenossPass).asInstanceOf[EditText]
-    txtMatchDevice =  findViewById(R.id.txtMatchDevice).asInstanceOf[EditText]
-    chkInvalidSSL  =  findViewById(R.id.chkInvalidSSL).asInstanceOf[CheckBox]
-
-    def getAlaramType(id: Int) ={
+  def buildOnEventChoice() {
+    val alarm_type = (id: Int) => {
       id match {
           case 1 => Alarm.ALARM_WITH_NOTIFICATION
           case 2 => Alarm.ALARM_WITH_NOTIFICATION_AND_SOUND
@@ -82,14 +71,13 @@ class GlobalConfiguration extends Activity  {
       }
     }
     val eventAdapter = ArrayAdapter.createFromResource(this, R.array.on_event_choice, android.R.layout.simple_spinner_item);
-    eventAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);    
+    eventAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
     //config spnOnCritical
-    spnOnCritical = findViewById(R.id.spnOnCritical).asInstanceOf[Spinner]
     spnOnCritical.setAdapter(eventAdapter);
     //TODO: make class for handling Alarm Spinner
     spnOnCritical.setOnItemSelectedListener(new OnItemSelectedListener() {
         def onItemSelected (parrent: AdapterView[_], v: View, position: Int, id:Long) ={
-          onCritical = getAlaramType(position)
+          onCritical = alarm_type(position)
         }
 
         def onNothingSelected(parrent: AdapterView[_]) = {
@@ -97,33 +85,56 @@ class GlobalConfiguration extends Activity  {
     })
 
     //config spnOnError
-    spnOnError = findViewById(R.id.spnOnError).asInstanceOf[Spinner]
     spnOnError.setAdapter(eventAdapter);
     spnOnError.setOnItemSelectedListener(new OnItemSelectedListener() {
         def onItemSelected (parrent: AdapterView[_], v: View, position: Int, id:Long) ={
-          onError = getAlaramType(position)
+          onError = alarm_type(position)
         }
 
         def onNothingSelected(parrent: AdapterView[_]) = {
         }
-      })   
+      })
 
     //config spnOnWarning
-    spnOnWarning = findViewById(R.id.spnOnWarning).asInstanceOf[Spinner]
     spnOnWarning.setAdapter(eventAdapter);
     spnOnWarning.setOnItemSelectedListener(new OnItemSelectedListener() {
         def onItemSelected (parrent: AdapterView[_], v: View, position: Int, id:Long) ={
-          onWarning = getAlaramType(position)
+          onWarning = alarm_type(position)
         }
 
         def onNothingSelected(parrent: AdapterView[_]) = {
         }
-      })  
+      })
+  }
+
+  def attachInputs() {
+    spnOnCritical  = findViewById(R.id.spnOnCritical).asInstanceOf[Spinner]
+    spnOnError     = findViewById(R.id.spnOnError).asInstanceOf[Spinner]
+    spnOnWarning   = findViewById(R.id.spnOnWarning).asInstanceOf[Spinner]
+    txtZenossURL   = findViewById(R.id.txtZenossURL).asInstanceOf[EditText]
+    txtZenossUser  = findViewById(R.id.txtZenossUser).asInstanceOf[EditText]
+    txtZenossPass  = findViewById(R.id.txtZenossPass).asInstanceOf[EditText]
+    txtMatchDevice = findViewById(R.id.txtMatchDevice).asInstanceOf[EditText]
+    chkInvalidSSL  = findViewById(R.id.chkInvalidSSL).asInstanceOf[CheckBox]
+    spnUpdateEvery = findViewById(R.id.spnUpdateEvery).asInstanceOf[Spinner]
+    spnSyncOver    = findViewById(R.id.spnSyncOver).asInstanceOf[Spinner]
+  }
+
+  override def onCreate(savedInstanceState: Bundle) {
+    super.onCreate(savedInstanceState)
+
+    setContentView(R.layout.global_configuration)
+    attachInputs
+
+    buildOnEventChoice
+
+    findViewById(R.id.btnSaveSettings).setOnClickListener(btnSaveSettingsOnClickListener)
+    findViewById(R.id.btnDeleteAccount).setOnClickListener(btnRemoveAccountOnClickListener)
+    //config texts
 
     val updateAdapter = ArrayAdapter.createFromResource(this, R.array.update_every_choice, android.R.layout.simple_spinner_item);
     updateAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-    spnUpdateEvery = findViewById(R.id.spnUpdateEvery).asInstanceOf[Spinner]
-    spnUpdateEvery.setAdapter(updateAdapter);    
+    spnUpdateEvery.setAdapter(updateAdapter);
     spnUpdateEvery.setOnItemSelectedListener(new OnItemSelectedListener() {
         def onItemSelected (parrent: AdapterView[_], v: View, position: Int, id:Long) ={
           updateEvery = position match  {
@@ -138,11 +149,10 @@ class GlobalConfiguration extends Activity  {
 
         def onNothingSelected(parrent: AdapterView[_]) = {
         }
-      })  
+      })
 
     val syncAdapter = ArrayAdapter.createFromResource(this, R.array.sync_over, android.R.layout.simple_spinner_item);
     syncAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-    spnSyncOver = findViewById(R.id.spnSyncOver).asInstanceOf[Spinner]
     spnSyncOver.setAdapter(syncAdapter)
     spnSyncOver.setOnItemSelectedListener(new OnItemSelectedListener() {
         def onItemSelected (parrent: AdapterView[_], v: View, position: Int, id:Long) ={
@@ -213,11 +223,11 @@ class GlobalConfiguration extends Activity  {
     .setTitle("Error in applying config")
     .setMessage(error)
     .setNegativeButton("No", new DialogInterface.OnClickListener() {
-        def onClick(dialog: DialogInterface, which:Int) ={ 
+        def onClick(dialog: DialogInterface, which:Int) ={
           dialog.cancel
         }
       })
-    .show();   
+    .show();
   }
 
   def saveSettings() = {
@@ -281,7 +291,7 @@ class GlobalConfiguration extends Activity  {
   }
 
   private class CheckSettings extends MyAsyncTask {
-    var dialog:ProgressDialog = _ 
+    var dialog:ProgressDialog = _
     override protected def doInBackground1(zenConf: Array[String]): String = {
       var acceptInvalidSSL = false
       if (zenConf(3).toString.toInt == 1)

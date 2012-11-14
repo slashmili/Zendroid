@@ -1,4 +1,4 @@
-package com.github.slashmili.Zendroid
+package com.github.slashmili.Zendroid.settings
 
 import _root_.android.os.Bundle
 import _root_.android.view.{View, Menu, MenuItem}
@@ -9,9 +9,11 @@ import _root_.android.preference.{PreferenceActivity, PreferenceManager, EditTex
 import _root_.android.app.{Activity, ProgressDialog, AlertDialog}
 
 import _root_.com.androidsnippets.SimpleCrypto
-import com.github.slashmili.Zendroid.Services.{ZenossUpdateService, ServiceRunner}
-import com.github.slashmili.Zendroid.utils._
-import ZenossEvents._
+
+import com.github.slashmili.Zendroid._
+import Services.{ZenossUpdateService, ServiceRunner}
+import utils.ZenossEvents._
+import utils.ZenossAPI
 
 
 object ZenroidSettings {
@@ -39,7 +41,7 @@ object ZenroidSettings {
   def mvOldConfig(context: Context) = {
     val oldConf = ZendroidPreferences.loadPref(context)
     val  sp=PreferenceManager.getDefaultSharedPreferences(context).edit
- 
+
     sp.putString(ZenroidSettings.PREFIX_KEY_URL, oldConf.get("url").toString)
     sp.putString(ZenroidSettings.PREFIX_KEY_USER, oldConf.get("user").toString)
     ZenroidSettings.encryptZenossPass(context, oldConf.get("pass").toString)
@@ -57,7 +59,7 @@ object ZenroidSettings {
 
 
   def isEmpty(context: Context) = {
-    if(getZenossURL(context) == "") 
+    if(getZenossURL(context) == "")
       true
     else
       false
@@ -71,7 +73,7 @@ object ZenroidSettings {
     try {
       return SimpleCrypto.decrypt(ZenroidSettings.ENCRYPT_KEY, pass)
     }catch {
-      case e => { 
+      case e => {
         e.printStackTrace()
         return ""
       }
@@ -102,7 +104,7 @@ object ZenroidSettings {
     }
     if(v.split("::").toList == List(""))
       List()
-    else 
+    else
       v.split("::").toList
   }
   def getPerformSyncing(context: Context) = prefs(context).getBoolean(ZenroidSettings.PREFIX_KEY_PERFORM_SYNCING, false)
@@ -118,7 +120,7 @@ class ZenroidSettings extends PreferenceActivity {
   var isRemoved = false
   var errorMessage = ""
 
-  
+
   var zenossURL = ""
   var zenossUser = ""
   var zenossPass = ""
@@ -132,7 +134,7 @@ class ZenroidSettings extends PreferenceActivity {
   var syncInterval = "300000"
   var syncOverWIFI = false
 
-  
+
   def setPreferences  = {
     val  sp=PreferenceManager.getDefaultSharedPreferences(ZenroidSettings.this)
     zenossURL  = sp.getString(ZenroidSettings.PREFIX_KEY_URL, "")
@@ -170,7 +172,7 @@ class ZenroidSettings extends PreferenceActivity {
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
     isDiscard = false
-    saveSettingsCheck = false 
+    saveSettingsCheck = false
     isRemoved = false
     setPreferences
     addPreferencesFromResource(R.xml.global_preferences)
@@ -223,7 +225,7 @@ class ZenroidSettings extends PreferenceActivity {
     return true
   }
 
-  def tryToSaveSettings = { 
+  def tryToSaveSettings = {
     val newZenossURL  = ZenroidSettings.getZenossURL(this)
     val newZenossUser = ZenroidSettings.getZenossUser(this)
     var newZenossPass = ZenroidSettings.getZenossPass(this)
@@ -232,11 +234,10 @@ class ZenroidSettings extends PreferenceActivity {
     }
     val newAcceptInvalidHTTPS = if(ZenroidSettings.getAcceptInvalidHTTPS(this) == false)
         "0"
-      else 
+      else
         "1"
     saveSettingsCheck = false
-    if(newZenossURL == zenossURL && newZenossUser == zenossUser && ZenroidSettings.getZenossPass(this) != "" && 
-      ZenroidSettings.getAcceptInvalidHTTPS(this) == acceptInvalidHTTPS){
+    if(mainSettingNotChanged){
       saveSettingsCheck = true
       runAndExit
     }else {
@@ -244,13 +245,25 @@ class ZenroidSettings extends PreferenceActivity {
     }
   }
 
+  private def mainSettingNotChanged() ={
+    val newZenossURL  = ZenroidSettings.getZenossURL(this)
+    val newZenossUser = ZenroidSettings.getZenossUser(this)
+    var newZenossPass = ZenroidSettings.getZenossPass(this)
+    val newAcceptInvalidHTTPS = if(ZenroidSettings.getAcceptInvalidHTTPS(this) == false)
+        "0"
+      else
+        "1"
+
+    newZenossURL == zenossURL && newZenossUser == zenossUser && ZenroidSettings.getZenossPass(this) != "" && ZenroidSettings.getAcceptInvalidHTTPS(this) == acceptInvalidHTTPS
+  }
+
   override def onOptionsItemSelected(item: MenuItem): Boolean ={
     item.getItemId match {
-      case R.id.mnuSave    => {
+      case R.id.mnuSave => {
         tryToSaveSettings
       }
       case R.id.mnuDiscard => {isDiscard = true ; finish }
-      case R.id.mnuRemoveAccount=> { 
+      case R.id.mnuRemoveAccount=> {
         //showPopupError(ZenroidSettings.getStates(this).toString)
         new AlertDialog.Builder(ZenroidSettings.this)
         .setTitle("Removing Account")
@@ -264,18 +277,18 @@ class ZenroidSettings extends PreferenceActivity {
             def onClick(dialog: DialogInterface, which:Int) ={
               ZenroidSettings.clear(ZenroidSettings.this)
               dialog.cancel
-              isRemoved = true ; 
-              finish 
+              isRemoved = true ;
+              finish
             }
           })
           .show()
       }
-      case _ => {} 
+      case _ => {}
     }
     return super.onOptionsItemSelected(item)
   }
 
-  
+
   override def onConfigurationChanged(newConfig: res.Configuration){
     super.onConfigurationChanged(newConfig)
 
@@ -289,6 +302,9 @@ class ZenroidSettings extends PreferenceActivity {
       "Setting is saved"
     }else if(isRemoved == true){
       "Account is removed"
+    } else if (mainSettingNotChanged){
+        tryToSaveSettings
+      "Setting is saved"
     }else {
       revertPreferences
       "Settings isn't saved, you need to press menu and save the settings"
@@ -306,7 +322,7 @@ class ZenroidSettings extends PreferenceActivity {
   }
 
   private class CheckSettings extends MyAsyncTask {
-    var dialog:ProgressDialog = _ 
+    var dialog:ProgressDialog = _
     override protected def doInBackground1(zenConf: Array[String]): String = {
       var acceptInvalidSSL = false
       if (zenConf(3).toString.toInt == 1)
@@ -361,11 +377,11 @@ class ZenroidSettings extends PreferenceActivity {
     .setTitle("Error in applying config")
     .setMessage(error)
     .setNegativeButton("No", new DialogInterface.OnClickListener() {
-        def onClick(dialog: DialogInterface, which:Int) ={ 
+        def onClick(dialog: DialogInterface, which:Int) ={
           dialog.cancel
         }
       })
-    .show();   
+    .show();
   }
 
   def runAndExit () ={

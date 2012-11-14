@@ -1,4 +1,4 @@
-package com.github.slashmili.Zendroid
+package com.github.slashmili.Zendroid.widgets
 
 import _root_.android.content.{Context, Intent}
 import _root_.android.appwidget.{AppWidgetProvider, AppWidgetManager}

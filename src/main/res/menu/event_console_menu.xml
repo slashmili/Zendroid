@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/mnuLastStatus"
-        android:title="Last Status" 
+        android:title="Status" 
         android:icon="@drawable/ic_menu_connect"
         />
     <item android:id="@+id/mnuRefresh"

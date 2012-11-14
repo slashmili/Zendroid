@@ -16,10 +16,13 @@ import _root_.java.io.IOException
 import _root_.android.net.{NetworkInfo, ConnectivityManager}
 import _root_.android.net.wifi.{WifiManager, WifiInfo}
 
-import com.github.slashmili.Zendroid.utils._
-import ZenossEvents._
-import com.github.slashmili.Zendroid.{R, GlobalConfiguration, ZendroidPreferences, EventConsoleActivity, ZenroidSettings}
+
 import Store._
+import com.github.slashmili.Zendroid._
+import utils.ZenossEvents._
+import utils.ZenossAPI
+import activities.{EventConsoleActivity, GlobalConfiguration}
+import settings.ZenroidSettings
 
 object ServiceRunner {
   var alarmManager:AlarmManager = _
@@ -63,10 +66,11 @@ object ServiceRunner {
       return true
     }
 
+    def getLastEvent() : Option[Map[String, String]] = {
+      return Some(Map("severity5" -> ServiceRunner.criticalEvent.toString, "severity4" -> ServiceRunner.errorEvent.toString, "severity3" -> ServiceRunner.warninigEvent.toString))
+    }
+
     def updateWidget(context: Context): RemoteViews = {
-      def getLastEvent() : Option[Map[String, String]] = {
-        return Some(Map("severity5" -> ServiceRunner.criticalEvent.toString, "severity4" -> ServiceRunner.errorEvent.toString, "severity3" -> ServiceRunner.warninigEvent.toString))
-      }
       try {
         val intentGlobalConfiguration = new Intent(context, classOf[EventConsoleActivity])
         val pendingIntentGlobalConfiguration = PendingIntent.getActivity(context, 0, intentGlobalConfiguration, 0)
