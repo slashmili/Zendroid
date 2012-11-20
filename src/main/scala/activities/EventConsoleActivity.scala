@@ -14,8 +14,8 @@ import _root_.android.content.DialogInterface.OnDismissListener
 
 
 import com.github.slashmili.Zendroid._
-import Services.ServiceRunner
-import Services.Store
+import services.ServiceRunner
+import services.store
 import utils.{ZenossAPI, CustomDeviceErrorListView}
 import utils.ZenossEvents._
 import settings.{ZendroidPreferences, ZenroidSettings}
@@ -26,8 +26,8 @@ class EventConsoleActivity extends Activity {
   var dlgShowDetails: Dialog = _
   var adapter = new CustomDeviceErrorListView(this)
   var expandedDevice:List[String] = List()
-  var selectedEvent:Store.Event = _
-  var selectedDevice:Store.ZenossDevice = _
+  var selectedEvent:store.Event = _
+  var selectedDevice:store.ZenossDevice = _
   var pgbEventConsoleLastWaiting: ProgressBar = _
 
   val receiver = new BroadcastReceiver() {
@@ -51,8 +51,8 @@ class EventConsoleActivity extends Activity {
 
     listView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
         def onChildClick(parent: ExpandableListView , v: View , groupPosition: Int , childPosition: Int, id: Long): Boolean = {
-        val event = adapter.getChild(groupPosition, childPosition).asInstanceOf[Store.Event]
-        val device = adapter.getGroup(groupPosition).asInstanceOf[Store.ZenossDevice]
+        val event = adapter.getChild(groupPosition, childPosition).asInstanceOf[store.Event]
+        val device = adapter.getGroup(groupPosition).asInstanceOf[store.ZenossDevice]
         //doing some work for child
         selectedEvent  = event
         selectedDevice = device
@@ -71,7 +71,7 @@ class EventConsoleActivity extends Activity {
     }
   }
 
-  def showDetails(device:Store.ZenossDevice,  event: Store.Event) = {
+  def showDetails(device:store.ZenossDevice,  event: store.Event) = {
     dlgShowDetails = new Dialog(EventConsoleActivity.this)
     dlgShowDetails.setContentView(R.layout.event_detail_dialog)
     dlgShowDetails.setTitle("Event Detail")
@@ -325,12 +325,12 @@ class EventConsoleActivity extends Activity {
         val zen = new ZenossAPI(url, user, pass, invalidSSL)
         zen.auth
         if(action(0) == "Acknowledge") {
-          if(action(2) == Store.EventState.NEW) {
+          if(action(2) == store.EventState.NEW) {
             result = zen.eventsAcknowledge(action(1))
-            selectedEvent.setEventState(Store.EventState.ACKNOWLEDGED)
+            selectedEvent.setEventState(store.EventState.ACKNOWLEDGED)
           }else {
             result = zen.eventsUnacknowledge(action(1))
-            selectedEvent.setEventState(Store.EventState.NEW)
+            selectedEvent.setEventState(store.EventState.NEW)
           }
           dlgShowDetails.dismiss
         }else if (action(0) =="Close") {

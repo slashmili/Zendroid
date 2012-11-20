@@ -6,7 +6,8 @@ import _root_.android.widget.RemoteViews
 import _root_.android.util.Log
 import _root_.org.json.JSONObject
 
-import com.github.slashmili.Zendroid.Services.ServiceRunner
+import com.github.slashmili.Zendroid._
+import services.ServiceRunner
 
 class SmallWidget extends AppWidgetProvider {
   override def onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: Array[Int]) = {

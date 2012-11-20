@@ -12,7 +12,7 @@ import _root_.android.util.Log
 
 
 import com.github.slashmili.Zendroid._
-import Services.ServiceRunner
+import services.ServiceRunner
 import utils.ZenossEvents._
 import utils.ZenossAPI
 import settings.ZendroidPreferences

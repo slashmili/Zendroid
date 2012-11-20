@@ -11,7 +11,7 @@ import _root_.android.app.{Activity, ProgressDialog, AlertDialog}
 import _root_.com.androidsnippets.SimpleCrypto
 
 import com.github.slashmili.Zendroid._
-import Services.{ZenossUpdateService, ServiceRunner}
+import services.{ZenossUpdateService, ServiceRunner}
 import utils.ZenossEvents._
 import utils.ZenossAPI
 
