@@ -194,7 +194,7 @@ class ZenroidSettings extends PreferenceActivity {
 
         new AlertDialog.Builder(ZenroidSettings.this)
         .setTitle("Settings have been changed")
-        .setMessage("Do you want to save new settings ?")
+        .setMessage("Do you want to save the settings?")
         .setNegativeButton("No", new DialogInterface.OnClickListener() {
             def onClick(dialog: DialogInterface, which:Int) ={
               dialog.cancel
