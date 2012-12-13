@@ -68,17 +68,7 @@ object ZenroidSettings {
   def getZenossURL(context: Context)  = prefs(context).getString(ZenroidSettings.PREFIX_KEY_URL, "")
   def getZenossUser(context: Context) = prefs(context).getString(ZenroidSettings.PREFIX_KEY_USER, "")
   def getZenossPassRaw(context: Context) = prefs(context).getString(ZenroidSettings.PREFIX_KEY_PASS, "")
-  def getZenossPass(context: Context): String = {
-    val pass =prefs(context).getString(ZenroidSettings.PREFIX_KEY_PASS, "")
-    try {
-      return SimpleCrypto.decrypt(ZenroidSettings.ENCRYPT_KEY, pass)
-    }catch {
-      case e => {
-        e.printStackTrace()
-        return ""
-      }
-    }
-  }
+  def getZenossPass(context: Context) = prefs(context).getString(ZenroidSettings.PREFIX_KEY_PASS, "")
   def encryptZenossPass(context: Context, pass: String) = {
     val pr = ZenroidSettings.prefs(context).edit
     pr.putString(ZenroidSettings.PREFIX_KEY_PASS, SimpleCrypto.encrypt(ZenroidSettings.ENCRYPT_KEY, pass))
