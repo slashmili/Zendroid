@@ -124,12 +124,18 @@ class ZenossUpdateService extends IntentService ("ZenossUpdateService") {
               JO.getString("summary")
             else
               ""
-          val eventId    = JO.getString("evid")
-          val countError = JO.getString("count").toInt
-          val severity   = JO.getString("severity").toInt
-          val eventState = JO.getString("eventState")
-          val firstTime  = JO.getString("firstTime")
-          val lastTime   = JO.getString("lastTime")
+          def get_string(jo: JSONObject, s: String) = {
+            if (jo.has(s))
+              jo.getString(s)
+            else
+              ""
+          }
+          val eventId    = get_string(JO, "evid")
+          val countError = get_string(JO, "count").toInt
+          val severity   = get_string(JO, "severity").toInt
+          val eventState = get_string(JO, "eventState")
+          val firstTime  = get_string(JO, "firstTime")
+          val lastTime   = get_string(JO, "lastTime")
           val component  = if(JO.has("component"))
               JO.getJSONObject("component").getString("text")
             else
