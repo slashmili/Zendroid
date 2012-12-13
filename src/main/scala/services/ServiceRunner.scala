@@ -57,7 +57,10 @@ object ServiceRunner {
     }
 
     def getLastEvent() : Option[Map[String, String]] = {
-      return Some(Map("severity5" -> ServiceRunner.criticalEvent.toString, "severity4" -> ServiceRunner.errorEvent.toString, "severity3" -> ServiceRunner.warninigEvent.toString))
+      return Some(Map("severity5" -> "%02d".format(ServiceRunner.criticalEvent),
+                      "severity4" -> "%02d".format(ServiceRunner.errorEvent),
+                      "severity3" -> "%02d".format(ServiceRunner.warninigEvent)
+                    ))
     }
 
     def updateWidget(context: Context): RemoteViews = {
@@ -85,7 +88,7 @@ object ServiceRunner {
         val remoteView = new RemoteViews(context.getPackageName(),R.layout.small_widget )
         if(events != None)
         {
-          if(events.get("severity5") == "0"){
+          if(events.get("severity5") == "00"){
             remoteView.setInt(R.id.severity5Img, "setAlpha", 100)
             remoteView.setInt(R.id.severity5Box, "setBackgroundResource", getRoundBackground(R.drawable.severity5_background_noevent, R.drawable.severity5_background_noevent_patch))
           }else {
@@ -96,7 +99,7 @@ object ServiceRunner {
           remoteView.setOnClickPendingIntent(R.id.severity5, pendingIntentGlobalConfiguration)
           remoteView.setOnClickPendingIntent(R.id.severity5Box, pendingIntentGlobalConfiguration)
 
-          if(events.get("severity4") == "0"){
+          if(events.get("severity4") == "00"){
             remoteView.setInt(R.id.severity4Img, "setAlpha", 100)
             remoteView.setInt(R.id.severity4Box, "setBackgroundResource", R.drawable.severity4_background_noevent)
           }else {
@@ -107,7 +110,7 @@ object ServiceRunner {
           remoteView.setOnClickPendingIntent(R.id.severity4, pendingIntentGlobalConfiguration)
           remoteView.setOnClickPendingIntent(R.id.severity4Box, pendingIntentGlobalConfiguration)
 
-          if(events.get("severity3") == "0"){
+          if(events.get("severity3") == "00"){
             remoteView.setInt(R.id.severity3Img, "setAlpha", 100)
             remoteView.setInt(R.id.severity3Box, "setBackgroundResource", getRoundBackground(R.drawable.severity3_background_noevent, R.drawable.severity3_background_noevent_patch))
           }else {
