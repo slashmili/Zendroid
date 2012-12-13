@@ -23,6 +23,6 @@ package="com.github.slashmili.Zendroid" xmlns:android="http://schemas.android.co
             </intent-filter>
                 <meta-data android:name="android.appwidget.provider" android:resource="@xml/small_widget" />
         </receiver>
-        <service android:name=".Services.ZenossUpdateService" />
+        <service android:name=".services.ZenossUpdateService" />
     </application>
 </manifest>
