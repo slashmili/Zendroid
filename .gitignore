@@ -15,3 +15,4 @@ sbt-launch-0.7.7.jar
 R.java
 src_managed/*
 Zenroid.keystore
+*.sw[o|p]

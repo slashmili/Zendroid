@@ -1,20 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
-	android:orientation="horizontal" 
-	android:layout_width="wrap_content" 
-	android:layout_height="wrap_content" 
-    android:background="@drawable/small_widget_error_background"  
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="horizontal"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+    android:background="@drawable/small_widget_error_background"
     android:clickable = "true"
 	android:id="@+id/WidgetErrorBox">
-
-<TextView
-    android:id="@+id/widgetError"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:textSize="10sp"
-    android:textColor="#000000" 
-    android:background="#a6a6a6"
-    android:text="Loading Zenroid configuration"
-    />
-
+    <TextView
+        android:id="@+id/widgetError"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:textColor="#000000"
+        android:background="#a6a6a6"
+        android:text="Loading Zenroid configuration"
+        />
 </LinearLayout>

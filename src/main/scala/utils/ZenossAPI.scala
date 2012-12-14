@@ -100,7 +100,7 @@ class ZenossEvents (url: String, cookie: String, acceptUntrustedSSL:Boolean = fa
     if(res == None)
       return None
     return Some(res.get._1)
- 
+
   }
 
 
@@ -112,7 +112,7 @@ class ZenossEvents (url: String, cookie: String, acceptUntrustedSSL:Boolean = fa
     if(jsonRes.has("result") && jsonRes.getJSONObject("result").has("success")){
       if(jsonRes.getJSONObject("result").getString("success") == "true")
           return true
-      else 
+      else
         return false
     }else if(jsonRes.has("type") && jsonRes.getString("type") == "exception"){
         throw new Exception(jsonRes.getString("message"))
@@ -148,7 +148,7 @@ object HttpClient {
   private def urlEncode(str: String) =  URLEncoder.encode(str, charset)
 
   def Json(url: String, data: JSONObject,  headers: List[(String, String)], acceptUntrustedSSL:Boolean = false): Option[(JSONObject, List[(String, String)])] = {
-    val postHeader = ("Content-type", "application/json") :: ("Accept", "application/json") :: headers 
+    val postHeader = ("Content-type", "application/json") :: ("Accept", "application/json") :: headers
     val req = Request(url, data.toString, postHeader, acceptUntrustedSSL)
     if (req != None )
       return Some(( new JSONObject(req.get._1), req.get._2 ))
@@ -169,8 +169,18 @@ object HttpClient {
     Request("%s?%s".format(url, raw_data), "", headers, acceptUntrustedSSL)
   }
 
+  private def retry[T](n: Int)(fn: => T): T = {
+    try {
+      fn
+    } catch {
+      case e =>
+        if (n > 1) retry(n - 1)(fn)
+        else throw e
+    }
+  }
+
   def Request(url: String, data: String, headers: List[(String, String)], acceptUntrustedSSL:Boolean = false): Option[(String, List[(String, String)])] = {
-    try 
+    try
     {
       val httpclient = if (acceptUntrustedSSL == false){
         new DefaultHttpClient()
@@ -184,23 +194,26 @@ object HttpClient {
       val se = new StringEntity(data)
 
       httpPostRequest.setEntity(se);
-      headers foreach { 
+      headers foreach {
         case(hname, hvalue) => httpPostRequest.setHeader(hname, hvalue)
       }
       httpPostRequest.setHeader("Accept-Encoding", "gzip")
 
       Log.d("HttpClient.Request: Executing Request")
       //TODO: set timeout
-      val response = httpclient.execute(httpPostRequest).asInstanceOf[HttpResponse]
+      //retry for sake of Android 2.3 owners http://goo.gl/uikUJ
+      val response = retry(4) {
+        httpclient.execute(httpPostRequest).asInstanceOf[HttpResponse]
+      }
       Log.d("HttpClient.Request: I've got some hot data from remote server")
 
       //Get headers
       var resHeader: List[(String,String)] = List()
 
       Log.d("HttpClient.Request: I'm getting headers")
-      response.getAllHeaders foreach { 
-        case(header) =>  
-        resHeader ::= (header.getName.toString , header.getValue.toString) 
+      response.getAllHeaders foreach {
+        case(header) =>
+        resHeader ::= (header.getName.toString , header.getValue.toString)
       }
       resHeader ::= ("StatusCode", response.getStatusLine().getStatusCode().toString)
 
@@ -226,7 +239,7 @@ object HttpClient {
       return Some((bos.toString, resHeader))
 
     } catch {
-      case e => 
+      case e =>
         e.printStackTrace();
         throw e
     }

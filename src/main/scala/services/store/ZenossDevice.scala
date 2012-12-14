@@ -1,29 +1,4 @@
-package com.github.slashmili.Zendroid.Services.Store
-
-object Severity {
-  val CRITICAL = 5
-  val ERROR    = 4
-  val WARNING  = 3
-  val INFO     = 2
-  val DEBUG    = 1
-}
-object EventState {
-    val NEW          = "New"
-    val ACKNOWLEDGED = "Acknowledged"
-    val SUPPRESSED   = "Suppressed"
-    val UNKNOWN      = "Unknown"
-} 
-class Event (evid: String, summary: String, severity: Int, count: Int, var eventState: String, firstTime: String, lastTime: String, component: String){
-  def getSeverity = severity
-  def getSummary  = summary
-  def getEvID     = evid
-  def getCount    = count
-  def getEventState = eventState
-  def setEventState(s: String) = { eventState = s }
-  def getFirstTime = firstTime
-  def getLastTime = lastTime
-  def getComponent = component
-}
+package com.github.slashmili.Zendroid.services.store
 
 class ZenossDevice(uid: String, name: String){
   var events:List[Event] = List()

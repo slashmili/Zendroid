@@ -1,0 +1,4 @@
+<resources>
+    <style name="ZenroidTheme" parent="@android:style/Theme.Holo">
+    </style>
+</resources>

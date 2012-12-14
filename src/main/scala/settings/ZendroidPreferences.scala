@@ -1,4 +1,4 @@
-package com.github.slashmili.Zendroid
+package com.github.slashmili.Zendroid.settings
 
 
 import _root_.android.content.{Context, SharedPreferences}

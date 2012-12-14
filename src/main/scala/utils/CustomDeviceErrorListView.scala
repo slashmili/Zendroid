@@ -9,16 +9,16 @@ import android.widget.BaseExpandableListAdapter
 import android.widget.{TextView, ImageView, LinearLayout}
 import _root_.android.util.{Log => aLog}
 
-import com.github.slashmili.Zendroid.Services.Store
+import com.github.slashmili.Zendroid.services.store
 import com.github.slashmili.Zendroid.R
 
 class CustomDeviceErrorListView (context: Context) extends BaseExpandableListAdapter {
 
   override def areAllItemsEnabled = true
   
-  var devices: List[Store.ZenossDevice] = List()
+  var devices: List[store.ZenossDevice] = List()
 
-  def addItem(zenDevice: Store.ZenossDevice) = {
+  def addItem(zenDevice: store.ZenossDevice) = {
     devices = devices ::: List(zenDevice)
   }
 
@@ -47,7 +47,7 @@ class CustomDeviceErrorListView (context: Context) extends BaseExpandableListAda
     }
 
     val ic = cv.findViewById(R.id.imgEventAcknowledgedIcon).asInstanceOf[ImageView]
-    if(ev.getEventState == Store.EventState.ACKNOWLEDGED){
+    if(ev.getEventState == store.EventState.ACKNOWLEDGED){
       ic.setImageResource(R.drawable.acknowledged_icon)
     }else {
       ic.setImageResource(0)
